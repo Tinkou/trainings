@@ -1,2 +1,9 @@
 .DS_Store
 *.odg#
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
