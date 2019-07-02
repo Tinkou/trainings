@@ -1,0 +1,41 @@
+\section{First worker}
+	
+	\begin{frame}
+		\frametitle{Objective}
+		
+		\begin{itemize}
+			\item[$\bullet$] Our first task is to create a wonderfull worker that will keep telling us that it is alive.
+			\item[$\bullet$] To keep simple, this worker will be in batch (but any langage will work).	
+			\item[$\bullet$] Then we will run this worker in a container on our local docker installation.
+		\end{itemize}
+		
+	\end{frame}		
+	
+	\begin{frame}[fragile]
+		\frametitle{Our first worker code}
+
+		First we place ourself in a working folder. And we create the worker core.
+		
+		\begin{block}{Source : worker.sh}
+			\begin{verbatim}
+				while(0);do
+				  echo "I'm alive and delighted about it!"
+				  sleep 2
+				done
+			\end{verbatim}
+		\end{block}
+		
+	\end{frame}
+
+	\begin{frame}[fragile]
+		\frametitle{Our first worker code}
+		
+		\begin{block}{Test the application}
+			\begin{verbatim}
+				chmod u+x worker.sh
+				./worker.sh
+			\end{verbatim}
+		\end{block}
+		We can kill it with hitting \textbf{Ctrl+C}
+		
+	\end{frame}
