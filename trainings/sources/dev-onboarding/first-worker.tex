@@ -12,11 +12,11 @@
 	\end{frame}		
 	
 	\begin{frame}[fragile]
-		\frametitle{Our first worker code}
+		\frametitle{Our worker code}
 
-		First we place ourself in a working folder. And we create the worker core.
+		First we place ourself in a working folder. And we create the worker core:
 		
-		\begin{block}{Source : worker.sh}
+		\begin{block}{worker.sh}
 			\begin{verbatim}
 				while(0);do
 				  echo "I'm alive and delighted about it!"
@@ -28,14 +28,146 @@
 	\end{frame}
 
 	\begin{frame}[fragile]
-		\frametitle{Our first worker code}
+		\frametitle{Test our worker}
 		
-		\begin{block}{Test the application}
+		\begin{block}{In a shell}
 			\begin{verbatim}
 				chmod u+x worker.sh
 				./worker.sh
 			\end{verbatim}
 		\end{block}
-		We can kill it with hitting \textbf{Ctrl+C}
+		We can kill our worker with hitting \textbf{Ctrl+C}.
 		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Embedded our worker in a container}
+		
+		We need to write a Dockerfile:
+		
+		\begin{block}{Dockerfile}
+			\begin{verbatim}
+				FROM alpine
+
+				COPY worker.sh .
+
+				CMD /worker.sh
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create our image}
+		
+		We create the image of our worker:
+		
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker build -t tinkou/worker:v1 .
+			\end{verbatim}
+		\end{block}
+		
+		This image can be seen locally in docker:
+
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker images
+			\end{verbatim}
+		\end{block}
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Run our container}
+		
+		Now that we have our worker image, it is time to run it in docker:
+		
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker run tinkou/worker:v1.0.0
+			\end{verbatim}
+		\end{block}
+		The output of our worker can be seen.
+		
+		We can kill our container with \textbf{Ctrl+C}.
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Time to play a little with our container}
+		
+		We can start our container in background and with giving it a name:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker run --name worker -d tinkou/worker:v1.0.0
+			\end{verbatim}
+		\end{block}
+		
+		\bigskip
+		We can still take a look to the logs:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker logs -f worker
+			\end{verbatim}
+		\end{block}
+		We can quit the follow with \textbf{Ctrl+C}. But the contaier still works:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker logs worker
+			\end{verbatim}
+		\end{block}
+
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Time to play a little with our container}
+		
+		We can start, stop and see the logs of our container at will:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker start worker
+				docker ps
+				docker stop worker
+				docker ps
+			\end{verbatim}
+		\end{block}
+		
+		\bigskip
+		This is always the same container running. We can see all existing containers to check it:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker ps -a
+			\end{verbatim}
+		\end{block}
+
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Clean after work}
+		
+		We first stop all the running containers:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker stop $(docker ps -q)
+			\end{verbatim}
+		\end{block}
+		
+		\bigskip
+		Then we destroy all the containers:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker rm $(docker ps -aq)
+			\end{verbatim}
+		\end{block}
+		
+		\bigskip
+		We can check with:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker ps
+				docker ps -a
+				docker images
+			\end{verbatim}
+		\end{block}
+
 	\end{frame}
