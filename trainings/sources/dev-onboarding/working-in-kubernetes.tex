@@ -1,0 +1,141 @@
+\section{Working in Kubernetes}
+
+	\begin{frame}
+		\frametitle{How to access to a Kubernetes cluster}
+		
+		First thing first, to deploy our worker on kubernetes, we need to access to a cluster.
+		
+		\bigskip
+		For that, we need to install kubectl on our worstation ( \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/}{installation documentation}).
+		 
+		 \bigskip
+		The documentation give instruction to configure the cluster access (using a config file given by your sysadmin).
+
+		\bigskip		
+		Very usefull, the documentation explain how to enable the completion.
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Working in a dedicated namespace}
+		
+		To avoid impacting other components, we are going to isolate ourselves in a namespace:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				kubectl get namespaces
+				kubectl create namespace my-namespace
+				kubectl get ns
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+		
+	\begin{frame}[fragile]
+		\frametitle{Working in a dedicated namespace}
+	
+		Then we configure kubectl to use his context:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				kubectl config get-context
+				
+				kubectl config set-context training \
+							--cluster=kubernetes \
+							--user=kubernetes-admin \
+							--namespace=my-namespace
+							
+				kubectl config use-context training
+				kubectl config get-context
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Running our first container in the cluster}
+	
+		To begin, we are just going to deploy a container sending a ping:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				kubectl run pingpong --image=alpine ping 1.1.1.1
+				
+				kubectl logs -f pingpong-XXXX-XXXX
+				kubectl get pods
+				kubectl get deployments -o wide
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Looking at logs in a kubernetes cluster}
+	
+		We want to display the logs of this container:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				kubectl logs -f pingpong-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+		
+		Something happens and we need to recreate the pod:
+		\begin{block}{Command line in window 2}
+			\begin{verbatim}
+				kubectl get pods -w
+			\end{verbatim}
+		\end{block}
+		\begin{block}{Command line in window 3}
+			\begin{verbatim}
+				kubectl delete pod pingpong-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Looking at logs in a kubernetes cluster}
+	
+		There are several problems:
+		\begin{itemize}
+			\item we do not see which logs comes from which pod
+			\item in fact we do not see the new containers logs
+			\item the follow is broken by the operation
+		\end{itemize}
+		
+		How to solve this and be able to follow logs even if pods are moving?
+	\end{frame}
+
+	\begin{frame}[fragile]
+		\frametitle{Using stern to look at logs}
+
+		Stern installation instructions can be found \href{https://github.com/wercker/stern}{here}.
+		
+		\bigskip
+		So, we are going the redo the operation but this time using stern:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				stern pingpong
+			\end{verbatim}
+		\end{block}
+				\begin{block}{Command line in window 2}
+			\begin{verbatim}
+				watch kubectl get pods
+			\end{verbatim}
+		\end{block}
+		\begin{block}{Command line in window 3}
+			\begin{verbatim}
+				kubectl delete pod pingpong-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Clean the namespace}
+		
+		Before returning to our worker, a little cleaning can be wise:
+		\begin{block}{Command line1}
+			\begin{verbatim}
+				kubectl delete deployment pinpong
+				kubectl get all
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+			
+%	- docker build
+%	- docker push
+%	- kubectl create deployment —image=trucmuche
+%	- kubectl get pods
+%	- kubectl logs sur le pod

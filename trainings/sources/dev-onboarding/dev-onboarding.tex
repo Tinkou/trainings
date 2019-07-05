@@ -4,6 +4,14 @@
 \usepackage{calc}  
 \usepackage{enumitem} 
 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
 \usetheme{Warsaw}
 
 \title{How to developp with Kubernetes}
@@ -25,5 +33,7 @@
 	\include{pre-requirements}
 	
 	\include{first-worker}
+	
+	\include{working-in-kubernetes}
 	
 \end{document}

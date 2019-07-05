@@ -18,8 +18,8 @@
 		
 		\begin{block}{worker.sh}
 			\begin{verbatim}
-				while(0);do
-				  echo "I'm alive and delighted about it!"
+				while true;do
+				  echo "I'm alive and it is $(date)!"
 				  sleep 2
 				done
 			\end{verbatim}
@@ -84,7 +84,7 @@
 		
 		\begin{block}{Command line}
 			\begin{verbatim}
-				docker run tinkou/worker:v1.0.0
+				docker run tinkou/worker:v1
 			\end{verbatim}
 		\end{block}
 		The output of our worker can be seen.
@@ -99,7 +99,7 @@
 		We can start our container in background and with giving it a name:
 		\begin{block}{Command line}
 			\begin{verbatim}
-				docker run --name worker -d tinkou/worker:v1.0.0
+				docker run --name worker -d tinkou/worker:v1
 			\end{verbatim}
 		\end{block}
 		
@@ -110,12 +110,7 @@
 				docker logs -f worker
 			\end{verbatim}
 		\end{block}
-		We can quit the follow with \textbf{Ctrl+C}. But the contaier still works:
-		\begin{block}{Command line}
-			\begin{verbatim}
-				docker logs worker
-			\end{verbatim}
-		\end{block}
+		We can quit the follow with \textbf{Ctrl+C}.
 
 	\end{frame}
 	
@@ -125,9 +120,10 @@
 		We can start, stop and see the logs of our container at will:
 		\begin{block}{Command line}
 			\begin{verbatim}
-				docker start worker
 				docker ps
 				docker stop worker
+				docker ps
+				docker start worker
 				docker ps
 			\end{verbatim}
 		\end{block}
@@ -145,21 +141,15 @@
 	\begin{frame}[fragile]
 		\frametitle{Clean after work}
 		
-		We first stop all the running containers:
+		We stop and remove the containers and then remove the images:
 		\begin{block}{Command line}
 			\begin{verbatim}
 				docker stop $(docker ps -q)
-			\end{verbatim}
-		\end{block}
-		
-		\bigskip
-		Then we destroy all the containers:
-		\begin{block}{Command line}
-			\begin{verbatim}
 				docker rm $(docker ps -aq)
+				docker rmi $(docker images -q)
 			\end{verbatim}
 		\end{block}
-		
+				
 		\bigskip
 		We can check with:
 		\begin{block}{Command line}
