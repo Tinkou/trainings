@@ -133,7 +133,111 @@
 			\end{verbatim}
 		\end{block}
 	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Running our worker in kubernetes}
+		
+		Now that we know how to run something in kubernetes, we are going to do it with our worker:
+		\begin{block}{Command line in window 2}
+			\begin{verbatim}
+				stern worker
+			\end{verbatim}
+		\end{block}		
+		\begin{block}{Command line in window 3}
+			\begin{verbatim}
+				kubectl get pods -w
+			\end{verbatim}
+		\end{block}
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				docker images
+				docker build -t tinkou/worker:v1 .
+				kubectl run worker --image=tinkou/worker:v1
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Troubleshooting}
+		
+		Kubectl get pods indicate that something went wrong.
+		
+		Check kubernetes object to find the problem root cause:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				kubectl	describe deployment worker
+				kubectl describe replicaset worker-XXXX
+				kubectl describe pod worker-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Using a registry}
+		
+		As our cluster can't access our local image, let's push it in a repository instead:
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				docker tag tinkou/worker:v1 <reg>/training/worker:v1
+				docker login <reg>
+				docker push <reg>/training/worker-<id>:v1
+			\end{verbatim}
+		\end{block}
+		\verb|<reg>| is the registry given by your sysadmin.
+		\verb|<id>| is used to differenciate the images between the different trainees.
+
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Using a registry}
+	
+		And we try again by forcing a pod reconstruction::
+		\begin{block}{Command line 1}
+			kubectl edit deployment worker
 			
+			\bigskip
+			And change the image field value.
+		\end{block}
+	
+	\end{frame}
+
+	\begin{frame}
+		\frametitle{Adding docker registry credentials}
+		
+		The logs on the pod indicate that docker registry credentials aren't valid.
+		
+		To facilitate the training, we can add to our namespace the credentials already defined in default in the secret regcred:
+		\begin{block}{Command line 1}
+				kubectl -n default get secret regcred -o yaml >regcred.yaml
+				
+				\medskip
+				vi regcred.yaml
+				
+				remove field namespace
+				
+				\medskip
+				kubectl apply -f regcred.yaml
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Adding docker registry credentials}
+		
+		Get our worker deployment yaml and add it the registry credentials:
+		\begin{block}{deployment.yaml}
+			---
+			
+				imagePullSecrets:
+				- name: regcred
+				
+			---
+			
+			kubectl apply -f deployment.yaml
+		\end{block}
+	\end{frame}
+
+
 %	- docker build
 %	- docker push
 %	- kubectl create deployment —image=trucmuche
