@@ -1,9 +1,19 @@
 \section{Working in Kubernetes}
 
 	\begin{frame}
+		\frametitle{Objective}
+		Now that we have a worker, we want to run it in a kubernetes cluster.
+		
+		\bigskip
+		The first step will be to run a container into kubernetes to make sure that we can do it.
+		
+		Then, we will run our worker in kubernetes.	
+	\end{frame}
+	
+	\begin{frame}
 		\frametitle{How to access to a Kubernetes cluster}
 		
-		First thing first, to deploy our worker on kubernetes, we need to access to a cluster.
+		First thing first, to deploy something in kubernetes, we need to access to a cluster.
 		
 		\bigskip
 		For that, we need to install kubectl on our worstation ( \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/}{installation documentation}).
@@ -36,10 +46,10 @@
 			\begin{verbatim}
 				kubectl config get-context
 				
-				kubectl config set-context training \
-							--cluster=kubernetes \
-							--user=kubernetes-admin \
-							--namespace=my-namespace
+				kubectl config set-context training        \
+				                   --cluster=kubernetes    \
+				                   --user=kubernetes-admin \
+				                   --namespace=my-namespace
 							
 				kubectl config use-context training
 				kubectl config get-context
@@ -179,12 +189,14 @@
 		As our cluster can't access our local image, let's push it in a repository instead:
 		\begin{block}{Command line 1}
 			\begin{verbatim}
-				docker tag tinkou/worker:v1 <reg>/training/worker:v1
-				docker login <reg>
-				docker push <reg>/training/worker-<id>:v1
+				docker tag tinkou/worker:v1 \
+				           <registry>/training/worker-<id>:v1
+				docker login <registry>
+				docker push <registry>/training/worker-<id>:v1
 			\end{verbatim}
 		\end{block}
-		\verb|<reg>| is the registry given by your sysadmin.
+		\verb|<registry>| is the registry given by your sysadmin.
+		
 		\verb|<id>| is used to differenciate the images between the different trainees.
 
 	\end{frame}
@@ -229,17 +241,15 @@
 			---
 			
 				imagePullSecrets:
+				
 				- name: regcred
 				
 			---
-			
+		\end{block}
+		
+		\bigskip
+		And apply it to update the configuration:
+		\begin{block}{Command line 1}
 			kubectl apply -f deployment.yaml
 		\end{block}
 	\end{frame}
-
-
-%	- docker build
-%	- docker push
-%	- kubectl create deployment —image=trucmuche
-%	- kubectl get pods
-%	- kubectl logs sur le pod
