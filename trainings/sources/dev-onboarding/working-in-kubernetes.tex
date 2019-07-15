@@ -65,13 +65,22 @@
 			\begin{verbatim}
 				kubectl run pingpong --image=alpine ping 1.1.1.1
 				
-				kubectl logs -f pingpong-XXXX-XXXX
 				kubectl get pods
 				kubectl get deployments -o wide
+				kubectl get replicaset -o wide
 			\end{verbatim}
 		\end{block}
 	\end{frame}
 	
+	\begin{frame}
+		\frametitle{Kubernetes application architecture}
+		
+		\begin{center}
+		\includegraphics[height=11.5cm]{../../../resources/color/fromCluster2container.pdf}
+		\end{center}
+		
+	\end{frame}		
+
 	\begin{frame}[fragile]
 		\frametitle{Looking at logs in a kubernetes cluster}
 	
@@ -100,9 +109,9 @@
 	
 		There are several problems:
 		\begin{itemize}
-			\item we do not see which logs comes from which pod
-			\item in fact we do not see the new containers logs
-			\item the follow is broken by the operation
+			\item[$\bullet$] we do not see which logs comes from which pod
+			\item[$\bullet$] in fact we do not see the new containers logs
+			\item[$\bullet$] the follow is broken by the operation
 		\end{itemize}
 		
 		How to solve this and be able to follow logs even if pods are moving?
@@ -122,7 +131,7 @@
 		\end{block}
 				\begin{block}{Command line in window 2}
 			\begin{verbatim}
-				watch kubectl get pods
+				watch kubectl get all
 			\end{verbatim}
 		\end{block}
 		\begin{block}{Command line in window 3}
@@ -201,55 +210,60 @@
 
 	\end{frame}
 	
-	\begin{frame}
+	\begin{frame}[fragile]
 		\frametitle{Using a registry}
 	
 		And we try again by forcing a pod reconstruction::
 		\begin{block}{Command line 1}
-			kubectl edit deployment worker
-			
-			\bigskip
+			\begin{verbatim}
+				kubectl edit deployment worker
+			\end{verbatim}
+			\medskip
 			And change the image field value.
 		\end{block}
 	
 	\end{frame}
 
-	\begin{frame}
+	\begin{frame}[fragile]
 		\frametitle{Adding docker registry credentials}
 		
 		The logs on the pod indicate that docker registry credentials aren't valid.
 		
-		To facilitate the training, we can add to our namespace the credentials already defined in default in the secret regcred:
+		We need to store in a kubernetes secret our registry credentials:
 		\begin{block}{Command line 1}
-				kubectl -n default get secret regcred -o yaml >regcred.yaml
-				
-				\medskip
-				vi regcred.yaml
-				
-				remove field namespace
-				
-				\medskip
-				kubectl apply -f regcred.yaml
+			\begin{verbatim}
+				kubectl create secret docker-registry regcred \
+				        --docker-server=<registry>            \
+				        --docker-username=<user>              \
+				        --docker-password=<password>          \
+				        --docker-email=<yourEmail>
+			\end{verbatim}
 		\end{block}
 	\end{frame}
 	
-	\begin{frame}
+	\begin{frame}[fragile]
 		\frametitle{Adding docker registry credentials}
 		
-		Get our worker deployment yaml and add it the registry credentials:
+		Get our worker deployment yaml and add to it these credentials:
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				kubectl get deployment worker -o yaml >deployment.yaml
+			\end{verbatim}
+		\end{block}
 		\begin{block}{deployment.yaml}
-			---
-			
-				imagePullSecrets:
-				
-				- name: regcred
-				
-			---
+			\begin{verbatim}
+				spec:
+				  template:
+				    spec:
+				      imagePullSecrets:
+				      - name: regcred
+			\end{verbatim}
 		\end{block}
 		
-		\bigskip
 		And apply it to update the configuration:
 		\begin{block}{Command line 1}
-			kubectl apply -f deployment.yaml
+			\begin{verbatim}
+				kubectl apply -f deployment.yaml
+			\end{verbatim}
 		\end{block}
 	\end{frame}

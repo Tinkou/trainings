@@ -1,4 +1,4 @@
-\section{Manage several configurations}
+\section{Managing different configurations}
 
 	\begin{frame}
 		\frametitle{Objective}
@@ -37,8 +37,8 @@
 		We are creating a folder tree to sort our files
 		\begin{block}{Command line 1}
 			\begin{verbatim}
-				mkdir kube-kusto-conf
-				cd kube-kusto-conf
+				mkdir kube
+				cd kube
 				mkdir base
 				cd base
 			\end{verbatim}
@@ -48,14 +48,54 @@
 	\begin{frame}[fragile]
 		\frametitle{Initialize the base}
 		
-		We are using our previous deployment.yaml as starting point
+		We are starting with a fresh new deployment.yaml
+		\begin{block}{source.yaml}
+			\begin{tiny}
+				\begin{verbatim}
+						apiVersion: apps/v1
+					kind: Deployment
+					metadata:
+					  name: worker
+					  labels:
+					    tinkou: worker
+					spec:
+					  selector:
+					    matchLabels:
+					      tinkou: worker
+					  template:
+					    metadata:
+					      labels:
+					        tinkou: worker
+					    spec:
+					      containers:
+					      - name: worker
+					        image: <registry>/training/worker-<id>:v1
+					      imagePullSecrets:
+					      - name: regcred
+				\end{verbatim}
+			\end{tiny}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Initialize the base}
 		\begin{block}{Command line 1}
 			\begin{verbatim}
-				cp ../../deployment.yaml .
 				touch kustomization.yaml
 				kustomize edit fix
-				kustomize edit add resource deployment.yaml
+				kustomize edit add resource source.yaml
 				kustomize build
+				kubectl apply -k .
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Initialize the base}
+		As we modify an immutable field, we need to delete the previous deployment before:
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				kubectl delete deployment worker
 				kubectl apply -k .
 			\end{verbatim}
 		\end{block}
@@ -92,14 +132,16 @@
 		\frametitle{Deploy the new version in our cluster}
 		
 		Change the deployment configuration:
-		\begin{block}{deployment.yaml}
+		\begin{block}{source.yaml}
 			Replace v1 by v2
 			
-			Add to the container part:
+			Add to the containers spec part:
 			\begin{verbatim}
-				env:
-				- name: NAME
-				  value: <myName>
+				spec:
+				  containers:
+				    env:
+				    - name: NAME
+				      value: <myName>
 			\end{verbatim}
 		\end{block}
 		
@@ -118,4 +160,181 @@
 		
 		\bigskip
 		Is there a way to simplify this?
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Skaffold}
+		
+		Skaffold is a developper oriented tool create to simplify the packaging and deployment on kubernetes.
+		
+		\medskip
+		The Skaffold documentation can be found \href{https://github.com/GoogleContainerTools/skaffold}{her}.
+		
+		\medskip
+		Installation documentation can be found \href{https://skaffold.dev/docs/getting-started}{here}.
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Initialize skaffold}
+		
+		Let's return in WORKER\_DIR and initialize skaffold:
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				skaffold init
+			\end{verbatim}
+			Follow the application command line interface.
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Initialize skaffold}
+
+		By default skaffold detect the yaml, so it need to be configured to use kustomize:
+		\begin{block}{skaffold.yaml}
+			Remove the tag from the image
+			
+			\medskip
+			Replace the block .deploy.kubectl by:
+			\begin{verbatim}
+				deploy:
+				  kustomize:
+				    path: kube/base			
+			\end{verbatim}						
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Using skaffold}
+		
+		We are going to test a little skaffold commands:
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				skaffold build
+				skaffold run
+				skaffold delete
+				skaffold dev
+			\end{verbatim}					
+		\end{block}
+		
+		Try to modify the file worker.sh.
+	
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create a kustomize layer for skaffold}
+		
+		Skaffold do not upgrade the image…
+		\begin{block}{Command line 4}
+			\begin{verbatim}
+				kubectl describe deployment worker
+			\end{verbatim}
+		\end{block}
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create a kustomize layer for skaffold}
+		We need to let skaffold manage the image tag version, by created a dedicated configuration:
+		\begin{block}{Command line 4}
+			\begin{small}
+				\begin{verbatim}
+					cd kube
+					mkdir skaffold
+					vi patch.yaml
+				\end{verbatim}
+			\end{small}
+		\end{block}
+		
+		\begin{block}{patch.yaml}
+			\begin{tiny}
+				\begin{verbatim}
+					apiVersion: apps/v1
+					kind: Deployment
+					metadata:
+					  name: worker
+					spec:
+					  template:
+					    spec:
+					      containers:
+					      - name: worker
+					        image: <registry>/training/worker-<id>
+				\end{verbatim}
+			\end{tiny}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create a kustomize layer for skaffold}
+
+		\begin{block}{Command line 4}
+			\begin{verbatim}
+				touch kustomization.yaml
+				kustomize edit fix
+				kustomize edit add resource ../base
+				kustomize edit add patch patch.yaml
+			\end{verbatim}
+		\end{block}
+		Indicate the new kustomize source to skaffold:
+		\begin{block}{skaffold.yaml}
+			\begin{verbatim}
+				deploy:
+				  kustomize:
+				    path: kube/skaffold
+			\end{verbatim}
+		\end{block}
+		And the worker should be automatically updated.
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Isolate the configuration in a configmap}
+
+		Add a file conf.env in the folder base:
+		\begin{block}{conf.env}
+			\begin{verbatim}
+				NAME=Georges
+			\end{verbatim}
+		\end{block}				
+		
+		\begin{block}{Command line 4}
+			\begin{verbatim}
+				kustomize edit add configmap worker \
+				                   --from-env-file conf.env
+			\end{verbatim}
+		\end{block}
+		
+		\begin{block}{source.yaml}
+			Replace the block .spec.template.spec.containers.env by:
+			\begin{verbatim}
+				envFrom:
+				  - configMapRef:
+				      name: worker
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Define a dev configuration}
+		
+		Create a configuration specific to the current development:
+		\begin{block}{patch.yaml}
+			Add a the file end:
+			\begin{verbatim}
+				---
+				apiVersion: v1
+				kind: ConfigMap
+				metadata:
+				  name: worker
+				data:
+				  NAME: Marion
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Skaffold dev modification detection}
+		
+		Try to modify (or just touch) several files to test which one trigger a skaffold build or run.
+		
+		And finally clean everything with Ctrl+C to interrupt the skaffold dev command.
 	\end{frame}
