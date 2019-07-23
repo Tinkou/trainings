@@ -1,14 +1,20 @@
 \section{Managing different configurations}
 
+\subsection{Objectives}
+
 	\begin{frame}
 		\frametitle{Objective}
 		
 		Now that we have a worker in kubernetes, we wants to be able to configure it.
 		
+		Also, we want to be able to differenciate between development and production configuration.
+		
 	\end{frame}
 	
+\subsection{Use kustomize}	
+	
 	\begin{frame}
-		\frametitle{Kustomize}
+		\frametitle{Kustomize among other solutions}
 		
 		\begin{center}
 		\includegraphics[height=7.5cm]{../../../resources/color/choiceConfigKind.pdf}
@@ -133,23 +139,27 @@
 		
 		Change the deployment configuration:
 		\begin{block}{source.yaml}
-			Replace v1 by v2
+			\begin{small}
+				Replace v1 by v2
 			
-			Add to the containers spec part:
-			\begin{verbatim}
-				spec:
-				  containers:
-				    env:
-				    - name: NAME
-				      value: <myName>
-			\end{verbatim}
+				Add to the containers spec part:
+				\begin{verbatim}
+					spec:
+					  containers:
+					    env:
+					    - name: NAME
+					      value: <myName>
+				\end{verbatim}
+			\end{small}
 		\end{block}
 		
 		And finaly apply the modification:
 		\begin{block}{Command line 1}
-			\begin{verbatim}
-				kubectl apply -k .
-			\end{verbatim}
+			\begin{small}
+					\begin{verbatim}
+					kubectl apply -k .
+				\end{verbatim}
+			\end{small}
 		\end{block}
 	\end{frame}
 	
@@ -161,6 +171,8 @@
 		\bigskip
 		Is there a way to simplify this?
 	\end{frame}
+	
+\subsection{Use skaffold}	
 	
 	\begin{frame}
 		\frametitle{Skaffold}
