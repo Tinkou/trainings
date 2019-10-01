@@ -16,16 +16,18 @@
 	\begin{frame}
 		\frametitle{How to access to a Kubernetes cluster}
 		
-		First thing first, to deploy something in kubernetes, we need to access to a cluster.
+		The kubectl client used to access a kubernetes cluster used the configuration file \$home/.kube/config
+		
+		More informations \href{https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/}{here}.
 		
 		\bigskip
-		For that, we need to install kubectl on our worstation ( \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/}{installation documentation}).
-		 
-		 \bigskip
-		The documentation give instruction to configure the cluster access (using a config file given by your sysadmin).
-
-		\bigskip		
-		Very usefull, the documentation explain how to enable the completion.
+		
+		If we are using Minikube, starting it already configure kubectl.
+		
+		\bigskip
+		
+		As indicated in \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/\#enabling-shell-autocompletion}{this documentation}, you can activated the completion for kubectl.
+		
 	\end{frame}
 	
 	\begin{frame}[fragile]
@@ -46,22 +48,25 @@
 	
 		Then we configure kubectl to use his context:
 		\begin{block}{Command line}
+			\begin{small}
 			\begin{verbatim}
-				kubectl config get-context
+					kubectl config get-context
 				
-				kubectl config set-context training        \
-				                   --cluster=kubernetes    \
-				                   --user=kubernetes-admin \
-				                   --namespace=my-namespace
+					kubectl config set-context training        \
+					                   --cluster=kubernetes    \
+					                   --user=kubernetes-admin \
+					                   --namespace=my-namespace
 							
-				kubectl config use-context training
-				kubectl config get-context
-			\end{verbatim}
+					kubectl config use-context training
+					kubectl config get-context
+				\end{verbatim}
+			\end{small}
 		\end{block}
+		In \textbf{minikube}, replace \textit{kubernetes} cluster and \textit{kubernetes-admin} user by \textit{minikube}.
 	\end{frame}
 	
 \subsection{Run a container in kubernetes}	
-	
+		
 	\begin{frame}[fragile]
 		\frametitle{Running our first container in the cluster}
 	
@@ -83,6 +88,13 @@
 		\begin{center}
 		\includegraphics[height=11.5cm]{../../../resources/color/fromCluster2container.pdf}
 		\end{center}
+		
+	\end{frame}		
+
+	\begin{frame}
+		\frametitle{Prepare the environment}
+		
+		Starting from now, we are going to use 3 shell in 3 differents windows/panes.
 		
 	\end{frame}		
 
@@ -125,10 +137,7 @@
 	\begin{frame}[fragile]
 		\frametitle{Using stern to look at logs}
 
-		Stern installation instructions can be found \href{https://github.com/wercker/stern}{here}.
-		
-		\bigskip
-		So, we are going the redo the operation but this time using stern:
+		So, we are going to redo the operation but this time using stern:
 		\begin{block}{Command line in window 1}
 			\begin{verbatim}
 				stern pingpong
@@ -150,12 +159,16 @@
 		\frametitle{Clean the namespace}
 		
 		Before returning to our worker, a little cleaning can be wise:
-		\begin{block}{Command line1}
+		\begin{block}{Command line in window 1}
 			\begin{verbatim}
 				kubectl delete deployment pinpong
 				kubectl get all
 			\end{verbatim}
 		\end{block}
+		
+		\medskip
+		
+		And stop the commands in the other windows.
 	\end{frame}
 	
 \subsection{Run our worker in kubernetes}
@@ -266,7 +279,10 @@
 				      - name: regcred
 			\end{verbatim}
 		\end{block}
-		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Adding docker registry credentials}
 		And apply it to update the configuration:
 		\begin{block}{Command line 1}
 			\begin{verbatim}

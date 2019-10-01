@@ -7,6 +7,96 @@
 		
 		Our project now need a web service.
 
+		\bigskip
 		This web service needed to be monitored and scallable.		
 		
+	\end{frame}
+	
+\subsection{Create the web service}
+	\begin{frame}[fragile]
+		\frametitle{Create the web service itself}
+		
+		Beside the folder WORKER\_DIR, create a folder WEB\_DIR.
+
+		\begin{block}{index.html}
+			\begin{small}
+				\begin{verbatim}
+					<!DOCTYPE HTML>
+					<html>
+					  <head>
+					    <meta charset="UTF-8">
+					    <title>Web service training</title>
+					  </head>
+					  <body>
+					    <h1>Hello World!</h1>
+					  </body>
+					</html>
+				\end{verbatim}
+			\end{small}
+		\end{block}			
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create the web service image}
+		
+		\begin{block}{Dockerfile}
+			\begin{small}
+				\begin{verbatim}
+					FROM nginx:alpine
+					COPY index.html /usr/share/nginx/html
+				\end{verbatim}
+			\end{small}
+		\end{block}
+		
+		\begin{block}{Command line 1}
+			\begin{small}
+				\begin{verbatim}
+					docker build -t <registry>/training/web-<id>:v1
+					docker push <registry>/training/web-<id>:v1
+				\end{verbatim}
+			\end{small}
+		\end{block}
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create kubernetes deployment configuration}
+		\begin{block}{deployment.yaml}
+			\begin{tiny}
+				\begin{verbatim}
+					apiVersion: apps/v1
+					kind: Deployment
+					metadata:
+					  name: web
+					  labels:
+					    tinkou: web
+					spec:
+					  selector:
+					    matchLabels:
+					      tinkou: web
+					  template:
+					    metadata:
+					      labels:
+					        tinkou: web
+					    spec:
+					      containers:
+					      - name: service
+					        image: <registry>/training/web-<id>:v1
+					      imagePullSecrets:
+					      - name: regcred
+				\end{verbatim}
+			\end{tiny}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create kubernetes deployment configuration}
+
+		\begin{block}{service.yaml}
+			\begin{small}
+				\begin{verbatim}
+					WIP
+				\end{verbatim}
+			\end{small}
+		\end{block}
 	\end{frame}

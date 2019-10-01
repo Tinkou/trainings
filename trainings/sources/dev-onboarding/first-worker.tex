@@ -124,13 +124,15 @@
 		
 		We can start, stop and see the logs of our container at will:
 		\begin{block}{Command line}
-			\begin{verbatim}
-				docker ps
-				docker stop worker
-				docker ps
-				docker start worker
-				docker ps
-			\end{verbatim}
+			\begin{small}
+				\begin{verbatim}
+					docker ps
+					docker stop worker
+					docker ps
+					docker start worker
+					docker ps
+				\end{verbatim}
+			\end{small}
 		\end{block}
 		
 		\bigskip
@@ -158,7 +160,7 @@
 		\end{block}
 				
 		\bigskip
-		We can check with:
+		We can check that nothing remain with:
 		\begin{block}{Command line}
 			\begin{verbatim}
 				docker ps
@@ -167,4 +169,20 @@
 			\end{verbatim}
 		\end{block}
 
+	\end{frame}
+	
+\subsection{Going farther}
+
+	\begin{frame}[fragile]
+		\frametitle{To go farther...}
+		
+		To learn more thing about docker, you can check \href{https://docs.docker.com}{Docker official documentation} or use the docker built-in help:
+		
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				docker help
+				docker help build
+				...
+			\end{verbatim}
+		\end{block}
 	\end{frame}
