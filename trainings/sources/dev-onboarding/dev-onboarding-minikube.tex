@@ -20,7 +20,7 @@
 \title{How to developp with Kubernetes}
 \subtitle{Developper worstation's tools}
 \author{Damien Ribeiro}
-\institute{\includegraphics[height=0.8cm]{tinkou.pdf}}
+\institute{\includegraphics[height=0.8cm]{../images/tinkou.pdf}}
 
 % Enable to aligne description
 \usepackage{calc}  
@@ -42,22 +42,20 @@
 		\tableofcontents
 	}
 	
-	\include{pre-requirements}
+	\include{sections/pre-requirements}
 	
-	\include{minikube}
+	\include{sections/minikube}
 	
-	\include{minikube-stop}
+	\include{sections/minikube-stop}
 	
-	\include{first-worker}
+	\include{sections/first-worker}
 	
-	\include{minikube-start}
+	\include{sections/working-in-kubernetes-minikube}
 	
-	\include{working-in-kubernetes}
+	\include{sections/kustomize}
 	
-	\include{kustomize}
+	\include{sections/batch}
 	
-	\include{batch}
-	
-	\include{web-service}
+	\include{sections/web-service}
 	
 \end{document}

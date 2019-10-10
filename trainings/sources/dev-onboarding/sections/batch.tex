@@ -27,13 +27,13 @@
 	\begin{frame}[fragile]
 		\frametitle{Create the batch}
 		
-		Beside the folder WORKER\_DIR, create a folder BATCH\_DIR.
+		Beside the folder \verb!worker!, create a folder \verb!batch!.
 		
 		\bigskip
 		Create the batch itself:
 		\begin{block}{batch.sh}
 			\begin{verbatim}
-				echo "It is $(date) and all is well!"
+				echo "I'm Humphrey and it is $(date)"
 			\end{verbatim}
 		\end{block}
 		Now, each execution is unitary.
@@ -41,8 +41,8 @@
 	
 	\begin{frame}[fragile]
 		\frametitle{Exercise}
-
-		Write a Dockerfile, build and push in the registry an image \verb|<registry>/training/batch-<id>:v1|
+		
+		Build and run in docker an image \verb|tinkou/batch:v1| containing this batch.
 	\end{frame}
 
 	\begin{frame}[fragile]
@@ -53,6 +53,7 @@
 				FROM alpine
 				
 				COPY batch.sh .
+				RUN chmod u+x batch.sh
 				
 				CMD /batch.sh
 			\end{verbatim}
@@ -60,13 +61,12 @@
 		
 		\begin{block}{Command line 1}
 			\begin{verbatim}
-				chmod u+x batch.yaml
-				docker build -t <registry>/training/batch-<id>:v1 .
-				docker push <registry>/training/batch-<id>:v1
+				docker build -t tinkou/batch:v1 .
+				docker run tinkou/batch:v1
 			\end{verbatim}
 		\end{block}
 	\end{frame}
-	
+				
 	\begin{frame}[fragile]
 		\frametitle{Create our first CronJob}
 		
@@ -88,13 +88,11 @@
 					        spec:
 					          containers:
 					          - name: runner
-					            image: <registry>/training/batch-<id>:v1
+					            image: tinkou/batch:v1
 					            env:
 					            - name: NAME
-					              value: Mathilde
+					              value: Chem
 					          restartPolicy: Never
-					          imagePullSecrets:
-					          - name: regcred
 				\end{verbatim}
 			\end{tiny}
 		\end{block}
@@ -136,11 +134,11 @@
 			\end{itemize}
 		\end{block}
 		
-		\begin{block}{CronJobs usefull options}
+		\begin{block}{CronJobs useful options}
 			\begin{itemize}
 				\item[$\bullet$] A field .spec.suspend enable to suspend the scheduling of a CronJob
 				\item[$\bullet$] Jobs in error aren't removed
-				\item[$\bullet$] The history limit of successfull jobs can be set
+				\item[$\bullet$] The history limit of successful jobs can be set
 			\end{itemize}
 		
 		\end{block}
@@ -151,32 +149,35 @@
 	\begin{frame}
 		\frametitle{Exercise}
 		
-		Modify the configuration to use kustomize and skaffold.
+		Modify the configuration to use kustomize and skaffold with:
+		\begin{itemize}
+			\item[$\bullet$] a base configuration similar as the current one
+			\item[$\bullet$] a local configuration for minikube with NAME=Dolph
+		\end{itemize}
 	\end{frame}
 	
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{In a new folder configuration}
+		\begin{block}{In a new folder batch/kube}
 			\begin{small}
 				\begin{verbatim}
-					configuration
+					kube
 					|- base
 					|  |- conf.env
 					|  |- cronjob.yaml
 					|  |- kustomization.yaml
-					|- skaffold
+					|- local
 					   |- conf.yaml
-					   |- cronjob.yaml
 					   |- kustomization.yaml
 				\end{verbatim}
 			\end{small}
 		\end{block}
 
-		\begin{block}{configuration/base/conf.env}
+		\begin{block}{kube/base/conf.env}
 			\begin{small}
 				\begin{verbatim}
-					NAME=Elodie
+					NAME=Humphrey
 				\end{verbatim}
 			\end{small}
 		\end{block}
@@ -186,7 +187,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 				
-		\begin{block}{configuration/base/cronjob.yaml}
+		\begin{block}{kube/base/cronjob.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: batch/v1beta1
@@ -194,7 +195,7 @@
 					metadata:
 					  name: my-batch
 					spec:
-					  schedule: "* 5 * * *"
+					  schedule: "* * * * *"
 					  jobTemplate:
 					    spec:
 					      template:
@@ -204,8 +205,7 @@
 					        spec:
 					          containers:
 					          - name: runner
-					            image: <registry>/training/batch-<id>:v1
-					            imagePullPolicy: IfNotPresent 
+					            image: tinkou/batch:v1
 					            envFrom:
 					            - configMapRef:
 					                name: batch
@@ -218,7 +218,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 
-		\begin{block}{configuration/base/kustomization.yaml creation}
+		\begin{block}{Command line 1 in folder kube/base}
 			\begin{verbatim}
 				touch kustomization.yaml
 				kustomize edit add resource cronjob.yaml
@@ -231,14 +231,14 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{configuration/skaffold/conf.yaml}
+		\begin{block}{kube/local/conf.yaml}
 			\begin{verbatim}
 				apiVersion: v1
 				kind: ConfigMap
 				metadata:
 				  name: batch
 				data:
-				  NAME: Marina
+				  NAME: Dolph
 			\end{verbatim}
 		\end{block}
 	\end{frame}
@@ -246,38 +246,12 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{configuration/skaffold/cronjob.yaml}
-		\begin{tiny}
-				\begin{verbatim}
-					apiVersion: batch/v1beta1
-					kind: CronJob
-					metadata:
-					  name: my-batch
-					spec:
-					  schedule: "* * * * *"
-					  jobTemplate:
-					    spec:
-					      template:
-					        spec:
-					          containers:
-					          - name: runner
-					            image: <registry>/training-<id>
-					          imagePullSecrets:
-					          - name: regcred
-				\end{verbatim}
-			\end{tiny}
-		\end{block}
-	\end{frame}
-	
-	\begin{frame}[fragile]
-		\frametitle{A solution}
-		
-		\begin{block}{configuration/skaffold/kustomization.yaml creation}
+		\begin{block}{Command line 1 in folder kube/local}
 			\begin{verbatim}
 				touch kustomization.yaml
 				kustomize edit fix
 				kustomize edit add resource ../base
-				kustomize edit add patch conf.yaml cronjob.yaml
+				kustomize edit add patch conf.yaml
 			\end{verbatim}
 		\end{block}
 	\end{frame}
@@ -285,16 +259,59 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{\$WORKER\_DIR/skaffold.yaml}
+		\begin{block}{batch/skaffold.yaml}
+			\begin{footnotesize}
+				\begin{verbatim}
+					apiVersion: skaffold/v1beta12
+					kind: Config
+					build:
+					  artifacts:
+					  - image: tinkou/batch
+					deploy:
+					  kustomize:
+					    path: kube/base
+					profiles:
+					- name: local
+					  activation:
+					  - kubeContext: minikube
+					  deploy:
+					    kustomize:
+					      path: kube/local
+				\end{verbatim}
+			\end{footnotesize}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{A solution}
+		
+		\begin{block}{Command line 1 in folder batch}
 			\begin{verbatim}
-				apiVersion: skaffold/v1beta12
-				kind: Config
-				build:
-				  artifacts:
-				  - image: <registry>/training/batch-<id>
-				deploy:
-				  kustomize:
-				    path: configuration/skaffold
+				skaffold run
 			\end{verbatim}
 		\end{block}
+		
+		\bigskip
+		
+		Take a quick look at the scheduling options and logs:
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				kubectl describe cronjob my-batch
+			\end{verbatim}
+		\end{block}
+		
+		\bigskip
+		
+		Clean after working:
+		\begin{block}{Command line 1 in folder batch}
+			\begin{verbatim}
+				skaffold delete
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}
+		\begin{center}
+			Questions?
+		\end{center}
 	\end{frame}

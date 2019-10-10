@@ -11,6 +11,24 @@
 		Then, we will run our worker in kubernetes.	
 	\end{frame}
 	
+	\begin{frame}[fragile]
+		\frametitle{In local with minikube}
+	
+		For the following, make sure that minikube is started:
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				minikube start
+			\end{verbatim}
+		\end{block}
+	
+		Check minikube status:
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				minikube status
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
 \subsection{Configure our environment}
 	
 	\begin{frame}
@@ -22,47 +40,12 @@
 		
 		\bigskip
 		
-		If we are using Minikube, starting it already configure kubectl.
+		As we are using Minikube, starting it already configure kubectl.
 		
 		\bigskip
 		
 		As indicated in \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/\#enabling-shell-autocompletion}{this documentation}, you can activated the completion for kubectl.
 		
-	\end{frame}
-	
-	\begin{frame}[fragile]
-		\frametitle{Working in a dedicated namespace}
-		
-		To avoid impacting other components, we are going to isolate ourselves in a namespace:
-		\begin{block}{Command line}
-			\begin{verbatim}
-				kubectl get namespaces
-				kubectl create namespace my-namespace
-				kubectl get ns
-			\end{verbatim}
-		\end{block}
-	\end{frame}
-		
-	\begin{frame}[fragile]
-		\frametitle{Working in a dedicated namespace}
-	
-		Then we configure kubectl to use his context:
-		\begin{block}{Command line}
-			\begin{small}
-			\begin{verbatim}
-					kubectl config get-context
-				
-					kubectl config set-context training        \
-					                   --cluster=kubernetes    \
-					                   --user=kubernetes-admin \
-					                   --namespace=my-namespace
-							
-					kubectl config use-context training
-					kubectl config get-context
-				\end{verbatim}
-			\end{small}
-		\end{block}
-		In \textbf{minikube}, replace \textit{kubernetes} cluster and \textit{kubernetes-admin} user by \textit{minikube}.
 	\end{frame}
 	
 \subsection{Run a container in kubernetes}	
@@ -75,9 +58,9 @@
 			\begin{verbatim}
 				kubectl run pingpong --image=alpine ping 1.1.1.1
 				
-				kubectl get pods
 				kubectl get deployments -o wide
 				kubectl get replicaset -o wide
+				kubectl get pods -o wide
 			\end{verbatim}
 		\end{block}
 	\end{frame}
@@ -94,7 +77,7 @@
 	\begin{frame}
 		\frametitle{Prepare the environment}
 		
-		Starting from now, we are going to use 3 shell in 3 differents windows/panes.
+		Starting from now, we are going to use 3 shells in 3 differents windows/panes.
 		
 	\end{frame}		
 
@@ -120,6 +103,8 @@
 			\end{verbatim}
 		\end{block}
 	\end{frame}
+	
+% Use the pods start section to explain kubernetes internal behavior and stress the difference between kubectl API OK response and effective command execution	
 	
 	\begin{frame}[fragile]
 		\frametitle{Looking at logs in a kubernetes cluster}
@@ -190,7 +175,6 @@
 		\begin{block}{Command line in window 1}
 			\begin{verbatim}
 				docker images
-				docker build -t tinkou/worker:v1 .
 				kubectl run worker --image=tinkou/worker:v1
 			\end{verbatim}
 		\end{block}
@@ -210,83 +194,52 @@
 			\end{verbatim}
 		\end{block}
 		
+		The "Events" are the interesting part here.
+		
 	\end{frame}
 	
 	\begin{frame}[fragile]
 		\frametitle{Using a registry}
 		
-		As our cluster can't access our local image, let's push it in a repository instead:
+		The events indicates that the image can not be found.
+		
+		\medskip
+		
+		The docker daemon in minikube is not the same as the local one.
+		
+		\medskip 
+		We need to:
+		\begin{itemize}
+			\item link the local docker CLI to the minikube docker daemon
+			\item create the image in the minikube docker daemon locale registry
+		\end{itemize}
+		
 		\begin{block}{Command line 1}
 			\begin{verbatim}
-				docker tag tinkou/worker:v1 \
-				           <registry>/training/worker-<id>:v1
-				docker login <registry>
-				docker push <registry>/training/worker-<id>:v1
+				eval $(minikube docker-env)
+				docker images
+				docker build -t tinkou/worker:v1 .
 			\end{verbatim}
 		\end{block}
-		\verb|<registry>| is the registry given by your sysadmin.
-		
-		\verb|<id>| is used to differenciate the images between the different trainees.
 
 	\end{frame}
 	
 	\begin{frame}[fragile]
 		\frametitle{Using a registry}
 	
-		And we try again by forcing a pod reconstruction::
-		\begin{block}{Command line 1}
-			\begin{verbatim}
-				kubectl edit deployment worker
-			\end{verbatim}
-			\medskip
-			And change the image field value.
-		\end{block}
+		After a moment, the pod start and stern start to display logs. What happen?
+		
+		\bigskip
+		
+		\visible<2->{
+			The different elements of kubernetes retry periodically. And as the image is now available, the pods can successfully start.
+		}
 	
 	\end{frame}
 
-	\begin{frame}[fragile]
-		\frametitle{Adding docker registry credentials}
-		
-		The logs on the pod indicate that docker registry credentials aren't valid.
-		
-		We need to store in a kubernetes secret our registry credentials:
-		\begin{block}{Command line 1}
-			\begin{verbatim}
-				kubectl create secret docker-registry regcred \
-				        --docker-server=<registry>            \
-				        --docker-username=<user>              \
-				        --docker-password=<password>          \
-				        --docker-email=<yourEmail>
-			\end{verbatim}
-		\end{block}
-	\end{frame}
-	
-	\begin{frame}[fragile]
-		\frametitle{Adding docker registry credentials}
-		
-		Get our worker deployment yaml and add to it these credentials:
-		\begin{block}{Command line 1}
-			\begin{verbatim}
-				kubectl get deployment worker -o yaml >deployment.yaml
-			\end{verbatim}
-		\end{block}
-		\begin{block}{deployment.yaml}
-			\begin{verbatim}
-				spec:
-				  template:
-				    spec:
-				      imagePullSecrets:
-				      - name: regcred
-			\end{verbatim}
-		\end{block}
-	\end{frame}
-	
-	\begin{frame}[fragile]
-		\frametitle{Adding docker registry credentials}
-		And apply it to update the configuration:
-		\begin{block}{Command line 1}
-			\begin{verbatim}
-				kubectl apply -f deployment.yaml
-			\end{verbatim}
-		\end{block}
+
+	\begin{frame}
+		\begin{center}
+			Questions?
+		\end{center}
 	\end{frame}

@@ -8,7 +8,7 @@
 		Our project now need a web service.
 
 		\bigskip
-		This web service needed to be monitored and scallable.		
+		This web service needed to be monitored and scalable.		
 		
 	\end{frame}
 	
@@ -16,9 +16,9 @@
 	\begin{frame}[fragile]
 		\frametitle{Create the web service itself}
 		
-		Beside the folder WORKER\_DIR, create a folder WEB\_DIR.
+		Create a new working folder \verb!web!.
 
-		\begin{block}{index.html}
+		\begin{block}{web/index.html}
 			\begin{small}
 				\begin{verbatim}
 					<!DOCTYPE HTML>
@@ -51,8 +51,7 @@
 		\begin{block}{Command line 1}
 			\begin{small}
 				\begin{verbatim}
-					docker build -t <registry>/training/web-<id>:v1
-					docker push <registry>/training/web-<id>:v1
+					docker build -t tinkou/web:1
 				\end{verbatim}
 			\end{small}
 		\end{block}
@@ -81,9 +80,7 @@
 					    spec:
 					      containers:
 					      - name: service
-					        image: <registry>/training/web-<id>:v1
-					      imagePullSecrets:
-					      - name: regcred
+					        image: tinkou/web:v1
 				\end{verbatim}
 			\end{tiny}
 		\end{block}
@@ -92,11 +89,109 @@
 	\begin{frame}[fragile]
 		\frametitle{Create kubernetes deployment configuration}
 
-		\begin{block}{service.yaml}
+		\begin{block}{Command line 2}
 			\begin{small}
 				\begin{verbatim}
-					WIP
+					stern -l tinkou=web
 				\end{verbatim}
 			\end{small}
 		\end{block}
+		
+		\begin{block}{Command line 3}
+			\begin{verbatim}
+				watch kubectl get all
+			\end{verbatim}
+		\end{block}
+		
+		\begin{block}{Command line 1 in folder web}
+			\begin{verbatim}
+				kubectl apply -f deployment.yaml
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Create kubernetes deployment configuration}
+		
+		A deployment, a replicaset and a pod are created.
+		
+		\bigskip
+		
+		But how to accede to this web service?
+	\end{frame}
+	
+\subsection{Accessing a web service}
+	\begin{frame}[fragile]
+		\frametitle{Exposing a web service}
+		
+		Pods have an IP…
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				kubectl get pod -o wide
+			\end{verbatim}
+		\end{block}
+		… but this IP is internal to the cluster.
+		\medskip
+		\visible<2->{
+			\begin{center}
+				---
+			
+				\medskip
+				In kubernetes, this exposition in done via services.
+			\end{center}
+		}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Exposing a web service}		
+		
+		\begin{block}{web/service.yaml}
+			\begin{footnotesize}
+				\begin{verbatim}
+					apiVersion: v1
+					kind: Service
+					metadata:
+					  name: my-service
+					  labels:
+					    tinkou: web
+					spec:
+					  type: NodePort
+					  selector:
+					    tinkou: web
+					  ports:
+					  - port: 80
+					    protocol: TCP
+					    nodePort: 32001
+			\end{verbatim}
+			\end{footnotesize}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Exposing a web service}
+		
+		\begin{block}{Command line 1 in folder web}
+			\begin{verbatim}
+				kubectl apply -f service.yaml
+				curl http://$(minikube ip):32001
+			\end{verbatim}
+		\end{block}
+		
+		\medskip
+		
+		Now we can access to the service.
+		
+		It is also possible to display it in a web browser (by replacing \verb!$(minikube ip)! by its value).
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{How does it work?}
+		
+		\begin{itemize}
+			\item[$\bullet$] the minikube VM has its IP given by \verb!minikube ip!
+			\item[$\bullet$] as a NodePort, the service listen to the port 32001 of all nodes
+			\item[$\bullet$] the service redirect requests in round robin to pods matching the selector
+			\item[$\bullet$] pods listen to the same ports as their containers
+			\item[$\bullet$] at least the container can answer to requests
+		\end{itemize}
 	\end{frame}

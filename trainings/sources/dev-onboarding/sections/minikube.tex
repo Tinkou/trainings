@@ -15,19 +15,11 @@
 \begin{frame}[fragile]
 	\frametitle{In local with minikube}
 	
-	Minikube consist of a single node kubernetes cluster. Here a few commands usefull for the workshop:
+	Minikube consist of a single node kubernetes cluster. Here a few commands useful for the workshop:
 	
 	\begin{block}{Get the cluster IP. This IP will be used as the one of each kubernetes servers (master or node):}
 		\begin{verbatim}
 			minikube ip
-		\end{verbatim}
-	\end{block}
-	
-	\medskip	
-	
-	\begin{block}{Use the docker daemon of minikube instead of a local one:}
-		\begin{verbatim}
-			eval $(minikube docker-env)
 		\end{verbatim}
 	\end{block}
 	
