@@ -195,3 +195,46 @@
 			\item[$\bullet$] at least the container can answer to requests
 		\end{itemize}
 	\end{frame}
+	
+\subsection{Going farther}
+	\begin{frame}
+		\frametitle{How to go farther?}
+		
+		With these tools it is possible:
+		\begin{itemize}
+			\item[$\bullet$] to have stacks with several different images
+			\item[$\bullet$] to use a real kubernetes instead of minikube
+			\item[$\bullet$] to debug inside deployed containers
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{A little more complex example}
+		
+		In \href{https://github.com/Tinkou/kubercoins}{this github repository}, you can found an example consisting of a complete stack.
+		
+		\bigskip
+		
+		This is an educationnal project based on \href{https://github.com/jpetazzo/dockercoins}{the work of jpetazzo}.
+		
+		\medskip
+		
+		This application stack is composed of 3 microservices, a redis database and a web UI. It generate and hash some random bit before counting the amount of bit groups hashed. The web UI display the average value.
+		
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{A little more complex example}
+		
+		As per say this project is just usefull to demonstrate the usage of several language and to manipulate kubernetes configuration.
+		
+		\medskip
+		
+		Finally, in the branch \textit{exercise}, there is the base configuration and it is possible to used it to try to create kustomize and skaffold configuration.
+	\end{frame}
+	
+	\begin{frame}
+		\begin{center}
+			Questions?
+		\end{center}
+	\end{frame}
