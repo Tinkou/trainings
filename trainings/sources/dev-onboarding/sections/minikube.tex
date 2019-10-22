@@ -1,0 +1,43 @@
+\begin{frame}
+	\frametitle{In local with minikube}
+	
+	We need to install the tools used during the workshops:
+	\begin{description}[leftmargin=!,labelwidth=\widthof{\bfseries Kustomize}]
+		\item[Docker] \href{https://hub.docker.com/search/?type=edition&offering=community}{Official release page}
+		\item[Kubectl] \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/}{Official installation documentation}
+		\item[Minikube] \href{https://kubernetes.io/docs/tasks/tools/install-minikube/}{Official installation documentation}
+		\item[Kustomize] \href{https://github.com/kubernetes-sigs/kustomize/blob/master/docs/INSTALL.md}{Official installation documentation}
+		\item[Skaffold] \href{https://skaffold.dev/docs/getting-started/\#installing-skaffold}{Official installation documentation}
+		\item[Stern] \href{https://github.com/wercker/stern}{Official installation documentation}
+	\end{description}	
+\end{frame}
+
+\begin{frame}
+	\frametitle{Warning about Kustomize and Skaffold}
+	
+	As it is now, Kustomize and Skaffold are still under construction. These tools give a great help but the version evolve quickly and the files version can change.
+	
+	To avoid compatibility issues, there is a need to define the update policy for those tool's version.
+	
+	\bigskip
+	
+	\begin{center}
+		\textit{As these problematic depends on the organisation of the team or company, it will not be talked here.}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{In local with minikube}
+	
+	Minikube consist of a single node kubernetes cluster. Here a few commands useful for the workshop:
+	
+	\begin{block}{Get the cluster IP. This IP will be used as the one of each kubernetes servers (master or node):}
+		\begin{verbatim}
+			minikube ip
+		\end{verbatim}
+	\end{block}
+	
+	\medskip
+	For the registry, we will use the docker local registry of minikube.
+\end{frame}

@@ -1,0 +1,194 @@
+\section{First worker}
+
+\subsection{Objectives}	
+	\begin{frame}
+		\frametitle{Objective}
+		
+		\begin{itemize}
+			\item[$\bullet$] Our first task is to create a wonderful worker that will keep telling us that it is alive.
+			\item[$\bullet$] To keep simple, this worker will be in batch (but any language will work).	
+			\item[$\bullet$] Then we will run this worker in a container on our local docker installation.
+		\end{itemize}
+		
+	\end{frame}
+
+\subsection{Create the worker}
+	
+	\begin{frame}[fragile]
+		\frametitle{Our worker code}
+
+		First we place ourselves in a working folder "\verb!worker!". And we create the worker core:
+		
+		\begin{block}{worker.sh}
+			\begin{verbatim}
+				while true;do
+				  echo "I'm alive and it is $(date)!"
+				  sleep 2
+				done
+			\end{verbatim}
+		\end{block}
+		
+	\end{frame}
+
+	\begin{frame}[fragile]
+		\frametitle{Test our worker}
+		
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				chmod u+x worker.sh
+				./worker.sh
+			\end{verbatim}
+		\end{block}
+		We can kill our worker with hitting \textbf{Ctrl+C}.
+		
+	\end{frame}
+	
+\subsection{Work with docker}
+
+	\begin{frame}[fragile]
+		\frametitle{Embedded our worker in a container}
+		
+		We need to write a Dockerfile:
+		
+		\begin{block}{Dockerfile}
+			\begin{verbatim}
+				FROM alpine
+
+				COPY worker.sh .
+
+				CMD /worker.sh
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Create our image}
+		
+		We create the image of our worker:
+		
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker build -t tinkou/worker:v1 .
+			\end{verbatim}
+		\end{block}
+		
+		This image can be seen locally in docker:
+
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker images
+			\end{verbatim}
+		\end{block}
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Run our container}
+		
+		Now that we have our worker image, it is time to run it in docker:
+		
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker run tinkou/worker:v1
+			\end{verbatim}
+		\end{block}
+		The output of our worker can be seen.
+		
+		We can kill our container with \textbf{Ctrl+C}.
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Time to play a little with our container}
+		
+		We can start our container in background and with giving it a name:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker run --name worker -d tinkou/worker:v1
+			\end{verbatim}
+		\end{block}
+		
+		\bigskip
+		We can still take a look to the logs:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker logs -f worker
+			\end{verbatim}
+		\end{block}
+		We can quit the follow with \textbf{Ctrl+C}.
+
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Time to play a little with our container}
+		
+		We can start, stop and see the logs of our container at will:
+		\begin{block}{Command line}
+			\begin{small}
+				\begin{verbatim}
+					docker ps
+					docker stop worker
+					docker ps
+					docker start worker
+					docker ps
+				\end{verbatim}
+			\end{small}
+		\end{block}
+		
+		\bigskip
+		This is always the same container running. We can see all existing containers to check it:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker ps -a
+			\end{verbatim}
+		\end{block}
+
+	\end{frame}
+	
+\subsection{Cleaning}	
+	
+	\begin{frame}[fragile]
+		\frametitle{Clean after work}
+		
+		We stop and remove the containers and then remove the images:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker stop $(docker ps -q)
+				docker rm $(docker ps -aq)
+				docker rmi $(docker images -q)
+			\end{verbatim}
+		\end{block}
+				
+		\bigskip
+		We can check that nothing remain with:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				docker ps
+				docker ps -a
+				docker images
+			\end{verbatim}
+		\end{block}
+
+	\end{frame}
+	
+\subsection{Going farther}
+
+	\begin{frame}[fragile]
+		\frametitle{To go farther...}
+		
+		To learn more thing about docker, you can check \href{https://docs.docker.com}{Docker official documentation} or use the docker built-in help:
+		
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				docker help
+				docker help build
+				...
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}
+		\begin{center}
+			Questions?
+		\end{center}
+	\end{frame}

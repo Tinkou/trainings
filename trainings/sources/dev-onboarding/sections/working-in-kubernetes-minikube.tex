@@ -1,0 +1,245 @@
+\section{Working in Kubernetes}
+
+\subsection{Objectives}
+	\begin{frame}
+		\frametitle{Objective}
+		Now that we have a worker, we want to run it in a kubernetes cluster.
+		
+		\bigskip
+		The first step will be to run a container into kubernetes to make sure that we can do it.
+		
+		Then, we will run our worker in kubernetes.	
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{In local with minikube}
+	
+		For the following, make sure that minikube is started:
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				minikube start
+			\end{verbatim}
+		\end{block}
+	
+		Check minikube status:
+		\begin{block}{In a shell}
+			\begin{verbatim}
+				minikube status
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+\subsection{Configure our environment}
+	
+	\begin{frame}
+		\frametitle{How to access to a Kubernetes cluster}
+		
+		The kubectl client used to access a kubernetes cluster used the configuration file \$home/.kube/config
+		
+		More informations \href{https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/}{here}.
+		
+		\bigskip
+		
+		As we are using Minikube, starting it already configure kubectl.
+		
+		\bigskip
+		
+		As indicated in \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/\#enabling-shell-autocompletion}{this documentation}, you can activated the completion for kubectl.
+		
+	\end{frame}
+	
+\subsection{Run a container in kubernetes}	
+		
+	\begin{frame}[fragile]
+		\frametitle{Running our first container in the cluster}
+	
+		To begin, we are just going to deploy a container sending a ping:
+		\begin{block}{Command line}
+			\begin{verbatim}
+				kubectl run pingpong --image=alpine ping 1.1.1.1
+				
+				kubectl get deployments -o wide
+				kubectl get replicaset -o wide
+				kubectl get pods -o wide
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Kubernetes application architecture}
+		
+		\begin{center}
+		\includegraphics[height=11.5cm]{../../../resources/color/fromCluster2container.pdf}
+		\end{center}
+		
+	\end{frame}		
+
+	\begin{frame}
+		\frametitle{Prepare the environment}
+		
+		Starting from now, we are going to use 3 shells in 3 differents windows/panes.
+		
+	\end{frame}		
+
+	\begin{frame}[fragile]
+		\frametitle{Looking at logs in a kubernetes cluster}
+	
+		We want to display the logs of this container:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				kubectl logs -f pingpong-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+		
+		Something happens and we need to recreate the pod:
+		\begin{block}{Command line in window 2}
+			\begin{verbatim}
+				kubectl get pods -w
+			\end{verbatim}
+		\end{block}
+		\begin{block}{Command line in window 3}
+			\begin{verbatim}
+				kubectl delete pod pingpong-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+% Use the pods start section to explain kubernetes internal behavior and stress the difference between kubectl API OK response and effective command execution	
+	
+	\begin{frame}[fragile]
+		\frametitle{Looking at logs in a kubernetes cluster}
+	
+		There are several problems:
+		\begin{itemize}
+			\item[$\bullet$] we do not see which logs comes from which pod
+			\item[$\bullet$] in fact we do not see the new containers logs
+			\item[$\bullet$] the follow is broken by the operation
+		\end{itemize}
+		
+		How to solve this and be able to follow logs even if pods are moving?
+	\end{frame}
+
+	\begin{frame}[fragile]
+		\frametitle{Using stern to look at logs}
+
+		So, we are going to redo the operation but this time using stern:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				stern pingpong
+			\end{verbatim}
+		\end{block}
+				\begin{block}{Command line in window 2}
+			\begin{verbatim}
+				watch kubectl get all
+			\end{verbatim}
+		\end{block}
+		\begin{block}{Command line in window 3}
+			\begin{verbatim}
+				kubectl delete pod pingpong-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Clean the namespace}
+		
+		Before returning to our worker, a little cleaning can be wise:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				kubectl delete deployment pinpong
+				kubectl get all
+			\end{verbatim}
+		\end{block}
+		
+		\medskip
+		
+		And stop the commands in the other windows.
+	\end{frame}
+	
+\subsection{Run our worker in kubernetes}
+
+	\begin{frame}[fragile]
+		\frametitle{Running our worker in kubernetes}
+		
+		Now that we know how to run something in kubernetes, we are going to do it with our worker:
+		\begin{block}{Command line in window 2}
+			\begin{verbatim}
+				stern worker
+			\end{verbatim}
+		\end{block}		
+		\begin{block}{Command line in window 3}
+			\begin{verbatim}
+				kubectl get pods -w
+			\end{verbatim}
+		\end{block}
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				docker images
+				kubectl run worker --image=tinkou/worker:v1
+			\end{verbatim}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Troubleshooting}
+		
+		Kubectl get pods indicate that something went wrong.
+		
+		Check kubernetes object to find the problem root cause:
+		\begin{block}{Command line in window 1}
+			\begin{verbatim}
+				kubectl	describe deployment worker
+				kubectl describe replicaset worker-XXXX
+				kubectl describe pod worker-XXXX-XXXX
+			\end{verbatim}
+		\end{block}
+		
+		The "Events" are the interesting part here.
+		
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Using a registry}
+		
+		The events indicates that the image can not be found.
+		
+		\medskip
+		
+		The docker daemon in minikube is not the same as the local one.
+		
+		\medskip 
+		We need to:
+		\begin{itemize}
+			\item link the local docker CLI to the minikube docker daemon
+			\item create the image in the minikube docker daemon locale registry
+		\end{itemize}
+		
+		\begin{block}{Command line 1}
+			\begin{verbatim}
+				eval $(minikube docker-env)
+				docker images
+				docker build -t tinkou/worker:v1 .
+			\end{verbatim}
+		\end{block}
+
+	\end{frame}
+	
+	\begin{frame}[fragile]
+		\frametitle{Using a registry}
+	
+		After a moment, the pod start and stern start to display logs. What happen?
+		
+		\bigskip
+		
+		\visible<2->{
+			The different elements of kubernetes retry periodically. And as the image is now available, the pods can successfully start.
+		}
+	
+	\end{frame}
+
+
+	\begin{frame}
+		\begin{center}
+			Questions?
+		\end{center}
+	\end{frame}

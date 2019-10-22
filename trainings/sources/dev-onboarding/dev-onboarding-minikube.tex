@@ -1,0 +1,61 @@
+\documentclass{beamer}
+
+% Indicate to use hyperlink and in which color put them 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=orange,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+
+% Define the presentation them
+\usetheme{Warsaw}
+
+% Set the general color
+\definecolor{Dark-lavender}{rgb}{0.45, 0.31, 0.59}
+\usecolortheme[named=Dark-lavender]{structure}
+
+% Define the context element
+\title{How to developp with Kubernetes}
+\subtitle{Developper worstation's tools}
+\author{Damien Ribeiro}
+\institute{\includegraphics[height=0.8cm]{../images/tinkou.pdf}}
+
+% Enable to aligne description
+\usepackage{calc}  
+\usepackage{enumitem} 
+% Add an option to left align element in a description
+\defbeamertemplate{description item}{align left}{\insertdescriptionitem\hfill}
+
+% Define table of content depth
+\setcounter{tocdepth}{1}
+
+\begin{document}
+	\frame {
+		\titlepage
+	}
+	
+		
+	\frame{
+		\frametitle{Outline}
+		\tableofcontents
+	}
+	
+	\include{sections/pre-requirements}
+	
+	\include{sections/minikube}
+	
+	\include{sections/minikube-stop}
+	
+	\include{sections/first-worker}
+	
+	\include{sections/working-in-kubernetes-minikube}
+	
+	\include{sections/kustomize}
+	
+	\include{sections/batch}
+	
+	\include{sections/web-service}
+	
+\end{document}
