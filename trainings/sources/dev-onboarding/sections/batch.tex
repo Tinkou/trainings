@@ -1,11 +1,11 @@
-\section{Batch and planification}
+\section{Batch and scheduling}
 
 \subsection{Objectives}
 
 	\begin{frame}
-		\frametitle{Objective}
+		\frametitle{Objectives}
 		
-		Our worker is working fine, but induce too many stress on the system.We want now to deploy it as a batch.
+		Our worker is fine, but induces too much stress on the system.We now want to deploy it as a batch.
 		
 		\bigskip
 		As such, we want to be able to schedule it.
@@ -15,23 +15,23 @@
 	\end{frame}
 
 	\begin{frame}
-		\frametitle{What kind use to deploy our application}
+		\frametitle{What kind to use to deploy our application}
 		
 		\begin{center}
 		\includegraphics[height=6.8cm]{../../../resources/color/choiceDeploymentType.pdf}
 		\end{center}
 	\end{frame}
 		
-\subsection{Create a batch in kubernetes}		
+\subsection{Creating a batch in kubernetes}		
 		
 	\begin{frame}[fragile]
-		\frametitle{Create the batch}
+		\frametitle{Creating the batch}
 		
 		Beside the folder \verb!worker!, create a folder \verb!batch!.
 		
 		\bigskip
 		Create the batch itself:
-		\begin{block}{batch.sh}
+		\begin{block}{batch/batch.sh}
 			\begin{verbatim}
 				echo "I'm Humphrey and it is $(date)"
 			\end{verbatim}
@@ -46,9 +46,9 @@
 	\end{frame}
 
 	\begin{frame}[fragile]
-		\frametitle{solution}
+		\frametitle{A solution}
 		
-		\begin{block}{Dockerfile}
+		\begin{block}{batch/Dockerfile}
 			\begin{verbatim}
 				FROM alpine
 				
@@ -59,7 +59,7 @@
 			\end{verbatim}
 		\end{block}
 		
-		\begin{block}{Command line 1}
+		\begin{block}{Command terminal in folder batch}
 			\begin{verbatim}
 				docker build -t tinkou/batch:v1 .
 				docker run tinkou/batch:v1
@@ -68,9 +68,9 @@
 	\end{frame}
 				
 	\begin{frame}[fragile]
-		\frametitle{Create our first CronJob}
+		\frametitle{Creating our first CronJob}
 		
-		\begin{block}{cronjob.yaml}
+		\begin{block}{batch/cronjob.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: batch/v1beta1
@@ -99,21 +99,21 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Create our first CronJob}
+		\frametitle{Creating our first CronJob}
 		
-		\begin{block}{Command line 2}
+		\begin{block}{Logs terminal}
 			\begin{verbatim}
 				stern -l tinkou=batch
 			\end{verbatim}
 		\end{block}
 		
-		\begin{block}{Command line 3}
+		\begin{block}{Monitor terminal}
 			\begin{verbatim}
 				watch kubectl get all
 			\end{verbatim}
 		\end{block}
 		
-		\begin{block}{Command line 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				kubectl apply -f cronjob.yaml
 			\end{verbatim}
@@ -130,13 +130,13 @@
 		\begin{block}{Conclusions}
 			\begin{itemize}
 				\item[$\bullet$] CronJob are easy to defined
-				\item[$\bullet$] stern is less adapt than a standard kubectl logs for jobs
+				\item[$\bullet$] stern is less adapted than a standard kubectl logs for jobs
 			\end{itemize}
 		\end{block}
 		
 		\begin{block}{CronJobs useful options}
 			\begin{itemize}
-				\item[$\bullet$] A field .spec.suspend enable to suspend the scheduling of a CronJob
+				\item[$\bullet$] A field .spec.suspend suspend the scheduling of a CronJob
 				\item[$\bullet$] Jobs in error aren't removed
 				\item[$\bullet$] The history limit of successful jobs can be set
 			\end{itemize}
@@ -144,7 +144,7 @@
 		\end{block}
 	\end{frame}
 	
-\subsection{Use a layer based configuration}	
+\subsection{Using a layer based configuration}	
 	
 	\begin{frame}
 		\frametitle{Exercise}
@@ -159,22 +159,25 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{In a new folder batch/kube}
+		\begin{block}{Folder tree in batch folder}
 			\begin{small}
 				\begin{verbatim}
-					kube
-					|- base
-					|  |- conf.env
-					|  |- cronjob.yaml
-					|  |- kustomization.yaml
-					|- local
-					   |- conf.yaml
-					   |- kustomization.yaml
+					batch
+					|- batch.sh
+					|- Dockerfile
+					|- kube
+					   |- base
+					   |  |- conf.env
+					   |  |- cronjob.yaml
+					   |  |- kustomization.yaml
+					   |- local
+					      |- conf.yaml
+					      |- kustomization.yaml
 				\end{verbatim}
 			\end{small}
 		\end{block}
 
-		\begin{block}{kube/base/conf.env}
+		\begin{block}{batch/kube/base/conf.env}
 			\begin{small}
 				\begin{verbatim}
 					NAME=Humphrey
@@ -187,7 +190,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 				
-		\begin{block}{kube/base/cronjob.yaml}
+		\begin{block}{batch/kube/base/cronjob.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: batch/v1beta1
@@ -218,7 +221,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 
-		\begin{block}{Command line 1 in folder kube/base}
+		\begin{block}{Command terminal in folder batch/kube/base}
 			\begin{verbatim}
 				touch kustomization.yaml
 				kustomize edit add resource cronjob.yaml
@@ -231,7 +234,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{kube/local/conf.yaml}
+		\begin{block}{batch/kube/local/conf.yaml}
 			\begin{verbatim}
 				apiVersion: v1
 				kind: ConfigMap
@@ -246,7 +249,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{Command line 1 in folder kube/local}
+		\begin{block}{Command terminal in folder batch/kube/local}
 			\begin{verbatim}
 				touch kustomization.yaml
 				kustomize edit fix
@@ -285,7 +288,7 @@
 	\begin{frame}[fragile]
 		\frametitle{A solution}
 		
-		\begin{block}{Command line 1 in folder batch}
+		\begin{block}{Command terminal in folder batch}
 			\begin{verbatim}
 				skaffold run
 			\end{verbatim}
@@ -294,7 +297,7 @@
 		\bigskip
 		
 		Take a quick look at the scheduling options and logs:
-		\begin{block}{Command line 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				kubectl describe cronjob my-batch
 			\end{verbatim}
@@ -303,7 +306,7 @@
 		\bigskip
 		
 		Clean after working:
-		\begin{block}{Command line 1 in folder batch}
+		\begin{block}{Command terminal in folder batch}
 			\begin{verbatim}
 				skaffold delete
 			\end{verbatim}

@@ -3,15 +3,15 @@
 \subsection{Objectives}
 
 	\begin{frame}
-		\frametitle{Objective}
+		\frametitle{Objectives}
 		
-		Now that we have a worker in kubernetes, we wants to be able to configure it.
+		Now that we have a worker in kubernetes, we want to be able to configure it.
 		
 		Also, we want to be able to differentiate between development and production configuration.
 		
 	\end{frame}
 	
-\subsection{Use kustomize}	
+\subsection{Using kustomize}	
 	
 	\begin{frame}
 		\frametitle{Kustomize among other solutions}
@@ -27,43 +27,41 @@
 		Kustomize is a tool now integrated in kubectl.
 		
 		\bigskip
-		It manage the configuration using a layer based system.
+		It manages the configuration using a layer based system.
 		
 		That means that a configuration is the result of a base configuration, on which layers are applied.
 		
-		Each layer can contains new resources or new patches.
+		Each layer can contain new resources or new patches.
 		
 		\bigskip
 		As a base layer is considered as a resource, that enable to define a configuration as the concatenation of several other configurations and their patches.
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Initialize the base}
+		\frametitle{Initializing the base}
 		
-		We are creating a folder tree to sort our files
-		\begin{block}{Command line 1 in folder worker}
+		We create a folder tree to sort our files
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
-				mkdir kube
-				cd kube
-				mkdir base
-				cd base
+				mkdir -p kube/base
+				cd kube/base
 			\end{verbatim}
 		\end{block}
 		
 		\bigskip
 		
 		\begin{footnotesize}
-			Command line 2 still had "\verb!stern worker!" running
+			Logs terminal still had "\verb!stern worker!" running
 			
-			Command line 3 still had "\verb!kubectl get pods -w!" running
+			Monitor terminal still had "\verb!kubectl get pods -w!" running
 		\end{footnotesize}
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Initialize the base}
+		\frametitle{Initializing the base}
 		
 		We are starting with a source.yaml file describing our deployment
-		\begin{block}{source.yaml}
+		\begin{block}{worker/kube/base/source.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: apps/v1
@@ -90,8 +88,8 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Initialize the base}
-		\begin{block}{Command line 1 in folder base}
+		\frametitle{Initializing the base}
+		\begin{block}{Command terminal in folder worker/kube/base}
 			\begin{verbatim}
 				touch kustomization.yaml
 				kustomize edit fix
@@ -103,9 +101,9 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Initialize the base}
+		\frametitle{Initializing the base}
 		As we modify an immutable field, we need to delete the previous deployment before:
-		\begin{block}{Command line 1 in folder base}
+		\begin{block}{Command terminal in folder worker/kube/base}
 			\begin{verbatim}
 				kubectl delete deployment worker
 				kubectl apply -k .
@@ -114,10 +112,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Add a parameter to our worker}
+		\frametitle{Adding a parameter to our worker}
 		
 		Modify the worker to use a parameter:
-		\begin{block}{worker.sh}
+		\begin{block}{worker/worker.sh}
 			\begin{verbatim}
 				while true; do
 				  echo "I'm $NAME and it is $(date)"
@@ -128,10 +126,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Deploy the new version in our cluster}
+		\frametitle{Deploying the new version in our cluster}
 		
-		First we need to create a new version of the image:
-		\begin{block}{Command line 1 in folder worker}
+		First we create a new version of the image:
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				docker build -t tinkou/worker:v2 .
 			\end{verbatim}
@@ -139,10 +137,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Deploy the new version in our cluster}
+		\frametitle{Deploying the new version in our cluster}
 		
-		Adapt in source.yaml the field \verb!.spec.template.spec!:
-		\begin{block}{source.yaml}
+		Update source.yaml the field \verb!.spec.template.spec!:
+		\begin{block}{worker/kube/base/source.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: apps/v1
@@ -172,10 +170,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Deploy the new version in our cluster}
+		\frametitle{Deploying the new version in our cluster}
 			
 		And finally apply the modification:
-		\begin{block}{Command line 1 in folder worker}
+		\begin{block}{Command terminal in folder worker}
 			\begin{small}
 					\begin{verbatim}
 					kubectl apply -k kube/base
@@ -186,9 +184,9 @@
 		\bigskip
 		
 		\visible<2->{
-			To clean what have been deployed:
+			To clean what has been deployed:
 		}
-		\begin{block}{Command line 1 in folder worker}<2->
+		\begin{block}{Command terminal in folder worker}<2->
 			\begin{verbatim}
 				kubectl delete -k kube/base
 			\end{verbatim}
@@ -196,7 +194,7 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Deploy the new version in our cluster}
+		\frametitle{Deploying the new version in our cluster}
 		
 		There are too many operations.
 		
@@ -204,23 +202,23 @@
 		Is there a way to simplify this?
 	\end{frame}
 	
-\subsection{Use skaffold}	
+\subsection{Using skaffold}	
 	
 	\begin{frame}
 		\frametitle{Skaffold}
 		
-		Skaffold is a developer oriented tool create to simplify the packaging and deployment on kubernetes.
+		Skaffold is a developer oriented tool created to simplify the packaging and deployment on kubernetes.
 		
 		\medskip
-		The Skaffold documentation can be found \href{https://github.com/GoogleContainerTools/skaffold}{her}.
+		The Skaffold documentation can be found \href{https://github.com/GoogleContainerTools/skaffold}{here}.
 
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Initialize skaffold}
+		\frametitle{Initializing skaffold}
 		
 		Let's initialize skaffold:
-		\begin{block}{Command line 1 in folder worker}
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				skaffold init
 			\end{verbatim}
@@ -229,10 +227,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Initialize skaffold}
+		\frametitle{Initializing skaffold}
 
-		Skaffold detect the yaml and skaffold.yaml needs to be configured to use kustomize:
-		\begin{block}{skaffold.yaml}
+		Skaffold detects the yaml and skaffold.yaml needs to be configured to use kustomize:
+		\begin{block}{worker/skaffold.yaml}
 			\begin{footnotesize}
 				\begin{verbatim}
 					apiVersion: skaffold/v1beta15
@@ -255,7 +253,7 @@
 		\frametitle{Using Skaffold}
 		
 		Let's use Skaffold to build our image:
-		\begin{block}{Command line 1 in folder worker}
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				skaffold run
 			\end{verbatim}
@@ -268,7 +266,7 @@
 			The current context can be with:
 		}
 
-		\begin{block}{Command line 1}<2->
+		\begin{block}{Command terminal}<2->
 			\begin{verbatim}
 				kubectl config current-context
 			\end{verbatim}
@@ -279,7 +277,7 @@
 		\frametitle{Using skaffold}
 		
 		We are going to test a little skaffold commands:
-		\begin{block}{Command line 1 in folder worker}
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				skaffold build
 				skaffold run
@@ -299,13 +297,13 @@
 		\frametitle{Using skaffold}
 		
 		Lets try the dev function:
-		\begin{block}{Command line 1 in folder worker}
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				skaffold dev
 			\end{verbatim}					
 		\end{block}
 
-		It works like run, but displaying logs and keeping the hand on the shell.
+		It works like run, but displays logs and stays in foreground.
 	\end{frame}
 	
 	\begin{frame}
@@ -317,20 +315,20 @@
 		
 		\bigskip
 		
-		And look at how skaffold dynamically build and deploy each time the file is saved.
+		And look at how skaffold dynamically builds and deploys each time the file is saved.
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Isolate the configuration in a configmap}
+		\frametitle{Isolating the configuration in a configmap}
 
 		Add a file conf.env in the folder base:
-		\begin{block}{conf.env}
+		\begin{block}{worker/kube/base/conf.env}
 			\begin{verbatim}
 				NAME=Trent
 			\end{verbatim}
 		\end{block}				
 		
-		\begin{block}{Command line 4 in the folder kube/base}
+		\begin{block}{Second command terminal in the folder worker/kube/base}
 			\begin{verbatim}
 				kustomize edit add configmap worker \
 				                   --from-env-file conf.env
@@ -339,9 +337,9 @@
 	\end{frame}
 
 	\begin{frame}[fragile]
-		\frametitle{Isolate the configuration in a configmap}
+		\frametitle{Isolating the configuration in a configmap}
 
-		\begin{block}{source.yaml}
+		\begin{block}{worker/kube/base/source.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: apps/v1
@@ -371,10 +369,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Define a local configuration}
+		\frametitle{Defining a local configuration}
 		
-		Create a folder \verb!local! in \verb!worker/kube!, and add in it the file \verb!patch.yaml!:
-		\begin{block}{patch.yaml}
+		Create a folder \verb!worker/kube/local!, and add in it the file \verb!patch.yaml!:
+		\begin{block}{worker/kube/local/patch.yaml}
 			\begin{verbatim}
 				apiVersion: v1
 				kind: ConfigMap
@@ -388,15 +386,15 @@
 		\medskip
 		
 		\visible<2->{
-			Nothing happen in skaffold dev.
+			Nothing happens in skaffold dev.
 		}
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Define a local configuration: kustomize}
+		\frametitle{Defining a local configuration: kustomize}
 		
 		First create a new kustomize project with a base resource and the patch:
-		\begin{block}{Command line 4 in folder worker/kube/local}
+		\begin{block}{Second command terminal in folder worker/kube/local}
 			\begin{verbatim}
 				touch kustomization.yaml
 				kustomize edit fix
@@ -405,16 +403,16 @@
 			\end{verbatim}
 		\end{block}
 		
-		\visible{
+		\visible<2->{
 			Still nothing in skaffold dev.
 		}
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Define a local configuration: skaffold}
+		\frametitle{Defining a local configuration: skaffold}
 		
 		Indicate to skaffold to use this local values when using minikube:
-		\begin{block}{skaffold.yaml}
+		\begin{block}{worker/skaffold.yaml}
 			\begin{tiny}
 				\begin{verbatim}
 						apiVersion: skaffold/v1beta15
@@ -441,12 +439,12 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Skaffold dev modifications detection}
+		\frametitle{Using skaffold dev modifications detection}
 		
 		Now the modification is deployed.
 		
 		Lets modify the base configuration:
-		\begin{block}{kube/base/conf.env}
+		\begin{block}{worker/kube/base/conf.env}
 			\begin{verbatim}
 				NAME=Dor
 			\end{verbatim}
@@ -462,7 +460,7 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Cleaning}
+		\frametitle{Cleaning up}
 		
 		If you kill the command \verb!skaffold dev! with \textbf{Ctrl+C}, skaffold will clean what it has deployed.
 	\end{frame}
