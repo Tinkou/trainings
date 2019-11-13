@@ -91,9 +91,7 @@
 		\frametitle{Initializing the base}
 		\begin{block}{Command terminal in folder worker/kube/base}
 			\begin{verbatim}
-				touch kustomization.yaml
-				kustomize edit fix
-				kustomize edit add resource source.yaml
+				kustomize create --autodetect
 				kustomize build
 				kubectl apply -k .
 			\end{verbatim}
@@ -117,6 +115,7 @@
 		Modify the worker to use a parameter:
 		\begin{block}{worker/worker.sh}
 			\begin{verbatim}
+				#!/usr/bin/env bash
 				while true; do
 				  echo "I'm $NAME and it is $(date)"
 				  sleep 2
@@ -396,9 +395,7 @@
 		First create a new kustomize project with a base resource and the patch:
 		\begin{block}{Second command terminal in folder worker/kube/local}
 			\begin{verbatim}
-				touch kustomization.yaml
-				kustomize edit fix
-				kustomize edit add resource ../base
+				kustomize create --resources ../base
 				kustomize edit add patch patch.yaml
 			\end{verbatim}
 		\end{block}

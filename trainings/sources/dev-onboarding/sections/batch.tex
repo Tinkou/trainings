@@ -223,8 +223,7 @@
 
 		\begin{block}{Command terminal in folder batch/kube/base}
 			\begin{verbatim}
-				touch kustomization.yaml
-				kustomize edit add resource cronjob.yaml
+				kustomize create --resources cronjob.yaml
 				kustomize edit add configmap batch \
 				                             --from-env-file conf.env
 			\end{verbatim}
@@ -251,9 +250,7 @@
 		
 		\begin{block}{Command terminal in folder batch/kube/local}
 			\begin{verbatim}
-				touch kustomization.yaml
-				kustomize edit fix
-				kustomize edit add resource ../base
+				kustomize create --resources ../base
 				kustomize edit add patch conf.yaml
 			\end{verbatim}
 		\end{block}
