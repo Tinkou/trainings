@@ -2,25 +2,26 @@
 
 \subsection{Objectives}	
 	\begin{frame}
-		\frametitle{Objective}
+		\frametitle{Objectives}
 		
 		\begin{itemize}
 			\item[$\bullet$] Our first task is to create a wonderful worker that will keep telling us that it is alive.
-			\item[$\bullet$] To keep simple, this worker will be in batch (but any language will work).	
+			\item[$\bullet$] To keep things simple, this worker will be a shell script.	
 			\item[$\bullet$] Then we will run this worker in a container on our local docker installation.
 		\end{itemize}
 		
 	\end{frame}
 
-\subsection{Create the worker}
+\subsection{Creating the worker}
 	
 	\begin{frame}[fragile]
-		\frametitle{Our worker code}
+		\frametitle{Creating a simple worker}
 
-		First we place ourselves in a working folder "\verb!worker!". And we create the worker core:
+		First we place ourselves in the folder "\verb!worker!". And we create the worker script:
 		
-		\begin{block}{worker.sh}
+		\begin{block}{worker/worker.sh}
 			\begin{verbatim}
+				#!/usr/bin/env bash
 				while true;do
 				  echo "I'm alive and it is $(date)!"
 				  sleep 2
@@ -31,9 +32,9 @@
 	\end{frame}
 
 	\begin{frame}[fragile]
-		\frametitle{Test our worker}
+		\frametitle{Testing our worker}
 		
-		\begin{block}{In a shell}
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				chmod u+x worker.sh
 				./worker.sh
@@ -43,14 +44,14 @@
 		
 	\end{frame}
 	
-\subsection{Work with docker}
+\subsection{Working with docker}
 
 	\begin{frame}[fragile]
-		\frametitle{Embedded our worker in a container}
+		\frametitle{Embedding our worker in a container}
 		
 		We need to write a Dockerfile:
 		
-		\begin{block}{Dockerfile}
+		\begin{block}{worker/Dockerfile}
 			\begin{verbatim}
 				FROM alpine
 
@@ -62,11 +63,11 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Create our image}
+		\frametitle{Creating our image}
 		
 		We create the image of our worker:
 		
-		\begin{block}{Command line}
+		\begin{block}{Command terminal in folder worker}
 			\begin{verbatim}
 				docker build -t tinkou/worker:v1 .
 			\end{verbatim}
@@ -74,7 +75,7 @@
 		
 		This image can be seen locally in docker:
 
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker images
 			\end{verbatim}
@@ -83,26 +84,26 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Run our container}
+		\frametitle{Running our container}
 		
 		Now that we have our worker image, it is time to run it in docker:
 		
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker run tinkou/worker:v1
 			\end{verbatim}
 		\end{block}
-		The output of our worker can be seen.
+		TWe can see our worker output.
 		
 		We can kill our container with \textbf{Ctrl+C}.
 		
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Time to play a little with our container}
+		\frametitle{Playing a little with our container}
 		
-		We can start our container in background and with giving it a name:
-		\begin{block}{Command line}
+		We can start our container in background and give it a name:
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker run --name worker -d tinkou/worker:v1
 			\end{verbatim}
@@ -110,7 +111,7 @@
 		
 		\bigskip
 		We can still take a look to the logs:
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker logs -f worker
 			\end{verbatim}
@@ -120,10 +121,10 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Time to play a little with our container}
+		\frametitle{Playing a little with our container}
 		
 		We can start, stop and see the logs of our container at will:
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{small}
 				\begin{verbatim}
 					docker ps
@@ -137,7 +138,7 @@
 		
 		\bigskip
 		This is always the same container running. We can see all existing containers to check it:
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker ps -a
 			\end{verbatim}
@@ -145,13 +146,13 @@
 
 	\end{frame}
 	
-\subsection{Cleaning}	
+\subsection{Cleaning up}	
 	
 	\begin{frame}[fragile]
-		\frametitle{Clean after work}
+		\frametitle{Cleaning up}
 		
-		We stop and remove the containers and then remove the images:
-		\begin{block}{Command line}
+		We stop and remove the containers and then remove the images (\textit{beware it will clean everything}):
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker stop $(docker ps -q)
 				docker rm $(docker ps -aq)
@@ -161,7 +162,7 @@
 				
 		\bigskip
 		We can check that nothing remain with:
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker ps
 				docker ps -a
@@ -171,14 +172,16 @@
 
 	\end{frame}
 	
-\subsection{Going farther}
+\subsection{Going further}
 
 	\begin{frame}[fragile]
-		\frametitle{To go farther...}
+		\frametitle{Going further...}
 		
-		To learn more thing about docker, you can check \href{https://docs.docker.com}{Docker official documentation} or use the docker built-in help:
+		To learn more about docker, you can check \href{https://docs.docker.com}{docker official documentation} or use the docker built-in help:
+
+		\medskip		
 		
-		\begin{block}{In a shell}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker help
 				docker help build

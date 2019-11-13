@@ -2,59 +2,60 @@
 
 \subsection{Objectives}
 	\begin{frame}
-		\frametitle{Objective}
+		\frametitle{Objectives}
 		Now that we have a worker, we want to run it in a kubernetes cluster.
 		
 		\bigskip
 		The first step will be to run a container into kubernetes to make sure that we can do it.
 		
+		\bigskip
 		Then, we will run our worker in kubernetes.	
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{In local with minikube}
+		\frametitle{Using minikube}
 	
 		For the following, make sure that minikube is started:
-		\begin{block}{In a shell}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				minikube start
 			\end{verbatim}
 		\end{block}
 	
 		Check minikube status:
-		\begin{block}{In a shell}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				minikube status
 			\end{verbatim}
 		\end{block}
 	\end{frame}
 	
-\subsection{Configure our environment}
+\subsection{Configuring the environment}
 	
 	\begin{frame}
-		\frametitle{How to access to a Kubernetes cluster}
+		\frametitle{Accessing a Kubernetes cluster}
 		
-		The kubectl client used to access a kubernetes cluster used the configuration file \$home/.kube/config
+		To access a kubernetes cluster, we use kubectl client configured with the file \textit{ \$home/.kube/config}
 		
-		More informations \href{https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/}{here}.
-		
-		\bigskip
-		
-		As we are using Minikube, starting it already configure kubectl.
+		More information \href{https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/}{here}.
 		
 		\bigskip
 		
-		As indicated in \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/\#enabling-shell-autocompletion}{this documentation}, you can activated the completion for kubectl.
+		As we are using Minikube, starting it already configures kubectl.
+		
+		\bigskip
+		
+		As indicated in \href{https://kubernetes.io/docs/tasks/tools/install-kubectl/\#enabling-shell-autocompletion}{this documentation}, you can enable the completion for kubectl.
 		
 	\end{frame}
 	
-\subsection{Run a container in kubernetes}	
+\subsection{Running a container in kubernetes}	
 		
 	\begin{frame}[fragile]
 		\frametitle{Running our first container in the cluster}
 	
 		To begin, we are just going to deploy a container sending a ping:
-		\begin{block}{Command line}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				kubectl run pingpong --image=alpine ping 1.1.1.1
 				
@@ -75,7 +76,7 @@
 	\end{frame}		
 
 	\begin{frame}
-		\frametitle{Prepare the environment}
+		\frametitle{Preparing the environment}
 		
 		Starting from now, we are going to use 3 shells in 3 differents windows/panes.
 		
@@ -85,19 +86,19 @@
 		\frametitle{Looking at logs in a kubernetes cluster}
 	
 		We want to display the logs of this container:
-		\begin{block}{Command line in window 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				kubectl logs -f pingpong-XXXX-XXXX
 			\end{verbatim}
 		\end{block}
 		
 		Something happens and we need to recreate the pod:
-		\begin{block}{Command line in window 2}
+		\begin{block}{Monitor terminal}
 			\begin{verbatim}
 				kubectl get pods -w
 			\end{verbatim}
 		\end{block}
-		\begin{block}{Command line in window 3}
+		\begin{block}{Logs terminal}
 			\begin{verbatim}
 				kubectl delete pod pingpong-XXXX-XXXX
 			\end{verbatim}
@@ -113,8 +114,9 @@
 		\begin{itemize}
 			\item[$\bullet$] we do not see which logs comes from which pod
 			\item[$\bullet$] in fact we do not see the new containers logs
-			\item[$\bullet$] the follow is broken by the operation
 		\end{itemize}
+
+		\medskip		
 		
 		How to solve this and be able to follow logs even if pods are moving?
 	\end{frame}
@@ -123,17 +125,17 @@
 		\frametitle{Using stern to look at logs}
 
 		So, we are going to redo the operation but this time using stern:
-		\begin{block}{Command line in window 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				stern pingpong
 			\end{verbatim}
 		\end{block}
-				\begin{block}{Command line in window 2}
+				\begin{block}{Monitor terminal}
 			\begin{verbatim}
 				watch kubectl get all
 			\end{verbatim}
 		\end{block}
-		\begin{block}{Command line in window 3}
+		\begin{block}{Second command terminal}
 			\begin{verbatim}
 				kubectl delete pod pingpong-XXXX-XXXX
 			\end{verbatim}
@@ -141,12 +143,12 @@
 	\end{frame}
 	
 	\begin{frame}[fragile]
-		\frametitle{Clean the namespace}
+		\frametitle{Cleaning up the namespace}
 		
 		Before returning to our worker, a little cleaning can be wise:
-		\begin{block}{Command line in window 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
-				kubectl delete deployment pinpong
+				kubectl delete deployment pingpong
 				kubectl get all
 			\end{verbatim}
 		\end{block}
@@ -156,23 +158,23 @@
 		And stop the commands in the other windows.
 	\end{frame}
 	
-\subsection{Run our worker in kubernetes}
+\subsection{Running our worker in kubernetes}
 
 	\begin{frame}[fragile]
 		\frametitle{Running our worker in kubernetes}
 		
 		Now that we know how to run something in kubernetes, we are going to do it with our worker:
-		\begin{block}{Command line in window 2}
+		\begin{block}{Logs terminal}
 			\begin{verbatim}
 				stern worker
 			\end{verbatim}
 		\end{block}		
-		\begin{block}{Command line in window 3}
+		\begin{block}{Monitor terminal}
 			\begin{verbatim}
 				kubectl get pods -w
 			\end{verbatim}
 		\end{block}
-		\begin{block}{Command line in window 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				docker images
 				kubectl run worker --image=tinkou/worker:v1
@@ -186,7 +188,7 @@
 		Kubectl get pods indicate that something went wrong.
 		
 		Check kubernetes object to find the problem root cause:
-		\begin{block}{Command line in window 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				kubectl	describe deployment worker
 				kubectl describe replicaset worker-XXXX
@@ -214,7 +216,7 @@
 			\item create the image in the minikube docker daemon locale registry
 		\end{itemize}
 		
-		\begin{block}{Command line 1}
+		\begin{block}{Command terminal}
 			\begin{verbatim}
 				eval $(minikube docker-env)
 				docker images
@@ -227,7 +229,7 @@
 	\begin{frame}[fragile]
 		\frametitle{Using a registry}
 	
-		After a moment, the pod start and stern start to display logs. What happen?
+		After a moment, the pod and stern starts displaying logs. What happened?
 		
 		\bigskip
 		
