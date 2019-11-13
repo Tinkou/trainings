@@ -11,7 +11,7 @@
 		
 	\end{frame}
 	
-\subsection{Using kustomize}	
+\subsection{Kustomize}	
 	
 	\begin{frame}
 		\frametitle{Kustomize among other solutions}
@@ -22,21 +22,14 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Layer based configuration}
+		\frametitle{Kustomize: a layered base configuration}
 		
-		Kustomize is a tool now integrated in kubectl.
-		
-		\bigskip
-		It manages the configuration using a layer based system.
-		
-		That means that a configuration is the result of a base configuration, on which layers are applied.
-		
-		Each layer can contain new resources or new patches.
-		
-		\bigskip
-		As a base layer is considered as a resource, that enable to define a configuration as the concatenation of several other configurations and their patches.
+		\begin{center}
+		\includegraphics[height=7.5cm]{../../../resources/color/layeredConfiguration.pdf}
+		\end{center}
 	\end{frame}
-	
+
+\subsection{Using kustomize}	
 	\begin{frame}[fragile]
 		\frametitle{Initializing the base}
 		
