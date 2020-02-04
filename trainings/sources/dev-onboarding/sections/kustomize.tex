@@ -54,7 +54,7 @@
 		\frametitle{Initializing the base}
 		
 		We are starting with a source.yaml file describing our deployment
-		\begin{block}{worker/kube/base/source.yaml}
+		\begin{block}{\href{https://github.com/Tinkou/trainings/blob/master/trainings/sources/dev-onboarding/files/worker/source.yaml}{worker/kube/base/source.yaml}}
 			\begin{tiny}
 				\begin{verbatim}
 					apiVersion: apps/v1
@@ -89,6 +89,8 @@
 				kubectl apply -k .
 			\end{verbatim}
 		\end{block}
+		\medskip
+		The command create will create a file kustomization.yaml in the current folder.
 	\end{frame}
 	
 	\begin{frame}[fragile]
@@ -216,6 +218,8 @@
 			\end{verbatim}
 			Follow the application command line interface.
 		\end{block}
+		\medskip
+		This command create a file skaffold.yaml.
 	\end{frame}
 	
 	\begin{frame}[fragile]
@@ -364,7 +368,7 @@
 		\frametitle{Defining a local configuration}
 		
 		Create a folder \verb!worker/kube/local!, and add in it the file \verb!patch.yaml!:
-		\begin{block}{worker/kube/local/patch.yaml}
+		\begin{block}{\href{https://github.com/Tinkou/trainings/blob/master/trainings/sources/dev-onboarding/files/worker/patch.yaml}{worker/kube/local/patch.yaml}}
 			\begin{verbatim}
 				apiVersion: v1
 				kind: ConfigMap
