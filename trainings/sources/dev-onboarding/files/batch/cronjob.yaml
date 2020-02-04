@@ -1,0 +1,17 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: my-batch
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            tinkou: batch
+        spec:
+          containers:
+          - name: runner
+            image: tinkou/batch:v1
+          restartPolicy: Never

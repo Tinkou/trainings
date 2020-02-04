@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    tinkou: web
+spec:
+  selector:
+    matchLabels:
+      tinkou: web
+  template:
+    metadata:
+      labels:
+        tinkou: web
+    spec:
+      containers:
+      - name: service
+        image: tinkou/web:v1

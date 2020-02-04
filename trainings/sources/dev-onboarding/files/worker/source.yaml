@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  labels:
+    tinkou: worker
+spec:
+  selector:
+    matchLabels:
+      tinkou: worker
+  template:
+    metadata:
+      labels:
+        tinkou: worker
+    spec:
+      containers:
+      - name: worker
+        image: tinkou/worker:v1
